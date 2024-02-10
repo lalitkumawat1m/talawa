@@ -1,6 +1,4 @@
 // ignore_for_file: talawa_api_doc
-// ignore_for_file: talawa_good_doc_comments
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:talawa/locator.dart';
@@ -17,8 +15,8 @@ class TaskForm extends StatefulWidget {
     required this.onSave,
     required this.title,
     required this.actionText,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Future<bool> Function() onSave;
   final String title;
@@ -131,7 +129,7 @@ class _TaskFormState extends State<TaskForm> {
 }
 
 class TitleField extends StatelessWidget {
-  const TitleField({Key? key}) : super(key: key);
+  const TitleField({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +142,8 @@ class TitleField extends StatelessWidget {
       maxLength: 100,
       validator: (value) => Validator.validateEventForm(value!, 'Title'),
       decoration: InputDecoration(
-        labelText: 'Add Task Title',
+        labelText:
+            AppLocalizations.of(context)!.strictTranslate('Add Task Title'),
         isDense: true,
         labelStyle: Theme.of(context).textTheme.titleMedium,
         focusedBorder: InputBorder.none,
@@ -167,7 +166,7 @@ class TitleField extends StatelessWidget {
 }
 
 class DescriptionField extends StatelessWidget {
-  const DescriptionField({Key? key}) : super(key: key);
+  const DescriptionField({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -182,8 +181,10 @@ class DescriptionField extends StatelessWidget {
       maxLines: 10,
       minLines: 1,
       decoration: InputDecoration(
-        hintText: 'Describe the task',
-        labelText: 'Add Description',
+        hintText:
+            AppLocalizations.of(context)!.strictTranslate('Describe the task'),
+        labelText:
+            AppLocalizations.of(context)!.strictTranslate('Add Description'),
         labelStyle: Theme.of(context).textTheme.titleMedium,
         border: InputBorder.none,
         focusedBorder: InputBorder.none,

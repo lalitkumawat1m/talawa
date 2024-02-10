@@ -125,6 +125,7 @@ void main() {
       //inputting a non email text in the field
       await tester.enterText(emailInputFieldWidget, 'non-url text');
       //submitting the field with non url input
+      await tester.ensureVisible(findLoginButton);
       await tester.tap(findLoginButton);
       await tester.pumpAndSettle(const Duration(milliseconds: 500));
       //testing the invalidEmailSubmission widget appears
@@ -171,6 +172,7 @@ void main() {
       //inputting a invalid password text in the field
       await tester.enterText(passwordInputFieldWidget, 'test');
       //submitting the field with invalid password input
+      await tester.ensureVisible(findLoginButton);
       await tester.tap(findLoginButton);
       await tester.pumpAndSettle(const Duration(milliseconds: 500));
       //testing the invalidPasswordSubmission widget appears
@@ -225,6 +227,15 @@ void main() {
       expect(loginButton, findsOneWidget);
 
       await tester.tap(loginButton);
+      await tester.pumpAndSettle();
+    });
+    testWidgets('Check if tip button works', (tester) async {
+      await showLoginScreen(tester);
+
+      final tipButton = find.text('Tip');
+      expect(tipButton, findsOneWidget);
+
+      await tester.tap(tipButton);
       await tester.pumpAndSettle();
     });
 

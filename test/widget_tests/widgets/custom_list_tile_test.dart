@@ -90,7 +90,7 @@ void main() {
       bool executed = false;
       _orgInfo = OrgInfo(
         name: 'Test Name',
-        isPublic: true,
+        userRegistrationRequired: false,
         creatorInfo: User(
           firstName: 'Test firstname',
           lastName: 'Test lastname',
@@ -144,7 +144,7 @@ void main() {
         (WidgetTester tester) async {
       _orgInfo = OrgInfo(
         name: 'Test Name',
-        isPublic: false,
+        userRegistrationRequired: true,
         creatorInfo: User(
           firstName: 'Test firstname',
           lastName: 'Test lastname',
@@ -237,7 +237,7 @@ void main() {
 
       // expect(userSizedBoxFallback, findsOneWidget);
 
-      // Testing SizedBox for users fallback for isPublic info
+      // Testing SizedBox for users fallback for userRegistrationRequired info
       // final userSizedBoxFallback1 = find
       //     .descendant(
       //       of: find.byType(Expanded).at(1),
@@ -250,7 +250,7 @@ void main() {
     testWidgets("Test when type is option", (WidgetTester tester) async {
       bool executed = false;
       _tileType = TileType.option;
-      _onTapOption = () => {executed = true};
+      _onTapOption = () => executed = true;
       await tester.pumpWidget(_createCustomListTile());
       await tester.pumpAndSettle();
 
@@ -258,6 +258,7 @@ void main() {
       expect(find.byKey(_key), findsOneWidget);
 
       // test to see if onTap of Inkwell works
+      await tester.ensureVisible(find.byType(InkWell));
       await tester.tap(find.byType(InkWell));
       await tester.pump();
       expect(executed, true);
@@ -303,8 +304,11 @@ void main() {
         optionSubtitleWidget.style,
         Theme.of(navigationService.navigatorKey.currentContext!)
             .textTheme
-            .bodySmall
-            ?.copyWith(color: Colors.black, fontSize: 18),
+            .bodyMedium
+            ?.copyWith(
+              color: Colors.black,
+              fontSize: 18,
+            ),
       );
 
       // Testing SizedBox for option when trailing icon button is null (fallback for creater info)

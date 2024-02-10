@@ -16,7 +16,7 @@ void main() {
       'image': 'image_url',
       'name': 'Name',
       'description': 'Description',
-      'isPublic': true,
+      'userRegistrationRequired': false,
       'creator': userJson,
       'members': [userJson],
       'admins': [userJson],
@@ -26,7 +26,7 @@ void main() {
       'image': 'image_url',
       'name': 'Name',
       'description': 'Description',
-      'isPublic': true,
+      'userRegistrationRequired': false,
       'creator': userJson,
       'members': [userJson],
       'admins': [userJson],
@@ -39,7 +39,7 @@ void main() {
       expect(result.image, 'image_url');
       expect(result.name, 'Name');
       expect(result.description, 'Description');
-      expect(result.isPublic, true);
+      expect(result.userRegistrationRequired, false);
       expect(result.creatorInfo!.authToken, ' ');
       expect(result.creatorInfo!.refreshToken, ' ');
       expect(result.creatorInfo!.id, 'user_id');
@@ -64,7 +64,7 @@ void main() {
       expect(result.image, 'image_url');
       expect(result.name, 'Name');
       expect(result.description, 'Description');
-      expect(result.isPublic, true);
+      expect(result.userRegistrationRequired, false);
       expect(result.creatorInfo!.authToken, ' ');
       expect(result.creatorInfo!.refreshToken, ' ');
       expect(result.creatorInfo!.id, 'user_id');
@@ -92,7 +92,7 @@ void main() {
         expect(result.image, 'image_url');
         expect(result.name, 'Name');
         expect(result.description, 'Description');
-        expect(result.isPublic, true);
+        expect(result.userRegistrationRequired, false);
         expect(result.creatorInfo!.authToken, ' ');
         expect(result.creatorInfo!.refreshToken, ' ');
         expect(result.creatorInfo!.id, 'user_id');
@@ -105,6 +105,71 @@ void main() {
         expect(result.admins![0].refreshToken, ' ');
         expect(result.admins![0].id, 'user_id');
       }
+    });
+
+    test('Test fromJsonToList with nested structures', () {
+      final List<dynamic> nestedJson = [
+        [json1, json2], // Nested list with org information
+        json1, // Single org information
+      ];
+
+      final List<OrgInfo> res = OrgInfo().fromJsonToList(nestedJson);
+
+      expect(
+        res.length,
+        3,
+      ); // There are two orgs in the nested list and one in the single org information
+
+      expect(res[0].id, '123');
+      expect(res[0].image, 'image_url');
+      expect(res[0].name, 'Name');
+      expect(res[0].description, 'Description');
+      expect(res[0].userRegistrationRequired, false);
+      expect(res[0].creatorInfo!.authToken, ' ');
+      expect(res[0].creatorInfo!.refreshToken, ' ');
+      expect(res[0].creatorInfo!.id, 'user_id');
+      expect(res[0].members!.length, 1);
+      expect(res[0].members![0].authToken, ' ');
+      expect(res[0].members![0].refreshToken, ' ');
+      expect(res[0].members![0].id, 'user_id');
+      expect(res[0].admins!.length, 1);
+      expect(res[0].admins![0].authToken, ' ');
+      expect(res[0].admins![0].refreshToken, ' ');
+      expect(res[0].admins![0].id, 'user_id');
+
+      expect(res[1].id, '321');
+      expect(res[1].image, 'image_url');
+      expect(res[1].name, 'Name');
+      expect(res[1].description, 'Description');
+      expect(res[1].userRegistrationRequired, false);
+      expect(res[1].creatorInfo!.authToken, ' ');
+      expect(res[1].creatorInfo!.refreshToken, ' ');
+      expect(res[1].creatorInfo!.id, 'user_id');
+      expect(res[1].members!.length, 1);
+      expect(res[1].members![0].authToken, ' ');
+      expect(res[1].members![0].refreshToken, ' ');
+      expect(res[1].members![0].id, 'user_id');
+      expect(res[1].admins!.length, 1);
+      expect(res[1].admins![0].authToken, ' ');
+      expect(res[1].admins![0].refreshToken, ' ');
+      expect(res[1].admins![0].id, 'user_id');
+
+      expect(res[2].id, '123');
+      expect(res[2].image, 'image_url');
+      expect(res[2].name, 'Name');
+      expect(res[2].description, 'Description');
+      expect(res[2].userRegistrationRequired, false);
+      expect(res[2].creatorInfo!.authToken, ' ');
+      expect(res[2].creatorInfo!.refreshToken, ' ');
+      expect(res[2].creatorInfo!.id, 'user_id');
+      expect(res[2].members!.length, 1);
+      expect(res[2].members![0].authToken, ' ');
+      expect(res[2].members![0].refreshToken, ' ');
+      expect(res[2].members![0].id, 'user_id');
+      expect(res[2].admins!.length, 1);
+      expect(res[2].admins![0].authToken, ' ');
+      expect(res[2].admins![0].refreshToken, ' ');
+      expect(res[2].admins![0].id, 'user_id');
     });
   });
 }

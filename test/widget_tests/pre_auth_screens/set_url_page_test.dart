@@ -173,33 +173,33 @@ Future<void> main() async {
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
               .titleLarge!
-              .copyWith(fontSize: 24, fontWeight: FontWeight.w700)
+              .copyWith(fontSize: 24, fontWeight: FontWeight.w700),
         },
         {
           'text': 'and ',
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
-              .headlineSmall
+              .headlineSmall,
         },
         {
           'text': 'Collaborate ',
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
               .titleLarge!
-              .copyWith(fontSize: 24, fontWeight: FontWeight.w700)
+              .copyWith(fontSize: 24, fontWeight: FontWeight.w700),
         },
         {
           'text': 'with your ',
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
-              .headlineSmall
+              .headlineSmall,
         },
         {
           'text': 'Organizations',
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
               .headlineSmall!
-              .copyWith(fontSize: 24, color: const Color(0xFF4285F4))
+              .copyWith(fontSize: 24, color: const Color(0xFF4285F4)),
         },
       ];
 
@@ -308,6 +308,7 @@ Future<void> main() async {
             .buttonLabel,
         'Login',
       );
+      await tester.ensureVisible(loginButtonWidget);
       await tester.tap(loginButtonWidget);
       await tester.pumpAndSettle();
     });
@@ -322,7 +323,10 @@ Future<void> main() async {
         find.byKey(const Key('UrlInputField')),
         'https://<org_url_here>/graphql',
       );
-      await tester.tap(find.byKey(const Key('LoginButton')));
+
+      final finder = find.byKey(const Key('LoginButton'));
+      await tester.ensureVisible(finder);
+      await tester.tap(finder);
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('UrlPageText')), findsOneWidget);
     });
@@ -506,33 +510,33 @@ Future<void> main() async {
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
               .titleLarge!
-              .copyWith(fontSize: 24, fontWeight: FontWeight.w700)
+              .copyWith(fontSize: 24, fontWeight: FontWeight.w700),
         },
         {
           'text': 'and ',
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
-              .headlineSmall
+              .headlineSmall,
         },
         {
           'text': 'Collaborate ',
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
               .titleLarge!
-              .copyWith(fontSize: 24, fontWeight: FontWeight.w700)
+              .copyWith(fontSize: 24, fontWeight: FontWeight.w700),
         },
         {
           'text': 'with your ',
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
-              .headlineSmall
+              .headlineSmall,
         },
         {
           'text': 'Organizations',
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
               .headlineSmall!
-              .copyWith(fontSize: 24, color: const Color(0xFF4285F4))
+              .copyWith(fontSize: 24, color: const Color(0xFF4285F4)),
         },
       ];
 
@@ -641,6 +645,8 @@ Future<void> main() async {
             .buttonLabel,
         'Login',
       );
+
+      await tester.ensureVisible(loginButtonWidget);
       await tester.tap(loginButtonWidget);
       await tester.pumpAndSettle();
     });

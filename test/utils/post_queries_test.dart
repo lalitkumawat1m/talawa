@@ -54,6 +54,47 @@ void main() {
       expect(fnData, data);
     });
 
+    test("Check if getPostById works correctly", () {
+      const data = """
+      query {
+        post(id: "abc")
+        { 
+          _id
+          text
+          createdAt
+          imageUrl
+          videoUrl
+          title
+          commentCount
+          likeCount
+          creator{
+            _id
+            firstName
+            lastName
+            image
+          }
+          organization{
+            _id
+          }
+          likedBy{
+            _id
+          }
+          comments{
+           _id,
+            text,
+             createdAt
+        creator{
+          firstName
+          lastName
+        }
+          }
+        }
+      }
+""";
+      final fnData = PostQueries().getPostById("abc");
+      expect(fnData, data);
+    });
+
     test("Check if removeLike works correctly", () {
       const data = """
      mutation unlikePost(\$postID: ID!) { 
@@ -67,6 +108,67 @@ void main() {
     }
   """;
       final fnData = PostQueries().removeLike();
+      expect(fnData, data);
+    });
+
+    test("Check if removePost works correctly", () {
+      const data = '''   
+    mutation RemovePost(\$id: ID!) {
+      removePost(id: \$id) {
+        _id
+      }
+    }
+    ''';
+      final fnData = PostQueries().removePost();
+      expect(fnData, data);
+    });
+    test("Check if uploadPost works correctly", () {
+      const data = '''
+    mutation CreatePost(
+    \$text: String!
+    \$title: String!
+    \$imageUrl: URL
+    \$videoUrl: URL
+    \$organizationId: ID!
+    \$file: String
+  ) {
+    createPost(
+      data: {
+        text: \$text
+        title: \$title
+        imageUrl: \$imageUrl
+        videoUrl: \$videoUrl
+        organizationId: \$organizationId
+      }
+      file: \$file
+    ) {
+      _id
+      text
+      createdAt
+      imageUrl
+      videoUrl
+      title
+      commentCount
+      likeCount
+      creator{
+        _id
+        firstName
+        lastName
+        image
+      }
+      organization{
+        _id
+      }
+      likedBy{
+        _id
+      }
+      comments{
+        _id
+          }
+    }
+  }
+    ''';
+      final fnData = PostQueries().uploadPost();
       expect(fnData, data);
     });
   });

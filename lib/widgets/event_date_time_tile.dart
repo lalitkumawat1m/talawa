@@ -1,23 +1,27 @@
-// ignore_for_file: talawa_api_doc, avoid_dynamic_calls
-// ignore_for_file: talawa_good_doc_comments
-
 import 'package:flutter/material.dart';
 import 'package:talawa/services/size_config.dart';
 
 /// Returns a widget tile(item) for displaying date and time.
 class DateTimeTile extends StatelessWidget {
   const DateTimeTile({
-    Key? key,
+    super.key,
     required this.date,
     required this.time,
     required this.setDate,
     required this.setTime,
-  }) : super(key: key);
-  // variables
+  });
+
+  /// Represents a date in string format.
   final String date;
+
+  /// Represents a time in string format.
   final String time;
-  final Function setDate;
-  final Function setTime;
+
+  /// Function that sets the date.
+  final Function() setDate;
+
+  /// Function that sets the time.
+  final Function() setTime;
 
   @override
   Widget build(BuildContext context) {

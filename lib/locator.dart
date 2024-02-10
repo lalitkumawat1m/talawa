@@ -8,6 +8,7 @@ import 'package:talawa/services/comment_service.dart';
 import 'package:talawa/services/database_mutation_functions.dart';
 import 'package:talawa/services/event_service.dart';
 import 'package:talawa/services/graphql_config.dart';
+import 'package:talawa/services/image_service.dart';
 import 'package:talawa/services/navigation_service.dart';
 import 'package:talawa/services/org_service.dart';
 import 'package:talawa/services/post_service.dart';
@@ -27,6 +28,7 @@ import 'package:talawa/view_model/after_auth_view_models/event_view_models/explo
 import 'package:talawa/view_model/after_auth_view_models/feed_view_models/organization_feed_view_model.dart';
 import 'package:talawa/view_model/after_auth_view_models/profile_view_models/edit_profile_view_model.dart';
 import 'package:talawa/view_model/after_auth_view_models/profile_view_models/profile_page_view_model.dart';
+import 'package:talawa/view_model/after_auth_view_models/settings_view_models/app_setting_view_model.dart';
 import 'package:talawa/view_model/after_auth_view_models/task_view_models/create_task_view_model.dart';
 import 'package:talawa/view_model/after_auth_view_models/task_view_models/explore_tasks_view_model.dart';
 import 'package:talawa/view_model/lang_view_model.dart';
@@ -70,11 +72,8 @@ final connectivity = locator<Connectivity>();
 ///creating GetIt for OrganizationService.
 final organizationService = locator<OrganizationService>();
 
-///creating GetIt for ImageCropper.
-final imageCropper = locator<ImageCropper>();
-
-///creating GetIt for ImagePicker.
-final imagePicker = locator<ImagePicker>();
+///creating GetIt for ImageService.
+final imageService = locator<ImageService>();
 
 /// This function registers the widgets/objects in "GetIt".
 ///
@@ -104,8 +103,9 @@ void setupLocator() {
   locator.registerLazySingleton(() => MultiMediaPickerService());
   locator.registerLazySingleton(() => Connectivity());
   locator.registerLazySingleton(() => ChatService());
-  locator.registerLazySingleton(() => ImageCropper());
+  locator.registerLazySingleton(() => ImageService());
   locator.registerLazySingleton(() => ImagePicker());
+  locator.registerLazySingleton(() => ImageCropper());
 
   //graphql
   locator.registerSingleton(GraphqlConfig());
@@ -136,6 +136,7 @@ void setupLocator() {
   locator.registerFactory(() => EditEventViewModel());
   locator.registerFactory(() => AddPostViewModel());
   locator.registerFactory(() => EventInfoViewModel());
+  locator.registerFactory(() => AppSettingViewModel());
 
   //Widgets viewModels
   locator.registerFactory(() => ProgressDialogViewModel());

@@ -1,15 +1,17 @@
-// ignore_for_file: talawa_api_doc
-// ignore_for_file: talawa_good_doc_comments
-
+// ignore_for_file: talawa_good_doc_comments, talawa_api_doc
 import 'package:flutter/material.dart';
 import 'package:talawa/utils/app_localization.dart';
 
 /// This class sets up the post page.
+///
 /// To implement the "show less" and "show more" functions for the text,
 /// we divide the text into two parts: firstHalf and secondHalf. A flag is set to
 /// track whether to display either the firstHalf or both(the entire text).
 class DescriptionTextWidget extends StatefulWidget {
   const DescriptionTextWidget({required this.text});
+
+  /// actual description to be displayed.
+  ///
   final String text;
 
   @override
@@ -17,10 +19,24 @@ class DescriptionTextWidget extends StatefulWidget {
 }
 
 class _DescriptionTextWidgetState extends State<DescriptionTextWidget> {
+  /// before clicking show more.
+  ///
+  ///
   late String firstHalf;
+
+  /// After the show more.
+  ///
+  ///
   late String secondHalf;
 
+  /// tags in the post.
+  ///
+  late String tag;
+
   //setting the flag to true initially
+  /// is show more turned on.
+  ///
+  ///
   bool flag = true;
 
   @override
@@ -30,8 +46,18 @@ class _DescriptionTextWidgetState extends State<DescriptionTextWidget> {
     if (widget.text.length > 150) {
       firstHalf = widget.text.substring(0, 150);
       secondHalf = widget.text.substring(150, widget.text.length);
+      tag = "";
     } else {
-      firstHalf = widget.text;
+      if (widget.text.split("#").length == 2) {
+        firstHalf = widget.text.split("#")[0];
+        tag = widget.text.split("#")[1];
+      } else if (widget.text.split("#").length == 1) {
+        firstHalf = widget.text;
+        tag = "";
+      } else {
+        firstHalf = widget.text.split("#")[0];
+        tag = "";
+      }
       secondHalf = "";
     }
   }
@@ -41,12 +67,25 @@ class _DescriptionTextWidgetState extends State<DescriptionTextWidget> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
       child: secondHalf.isEmpty
-          ? Text(
-              firstHalf,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium!
-                  .copyWith(fontFamily: 'open-sans'),
+          ? Column(
+              children: [
+                Text(
+                  firstHalf,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium!
+                      .copyWith(fontFamily: 'open-sans', color: Colors.black38),
+                ),
+                tag != ""
+                    ? Text(
+                        "# $tag",
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                              fontFamily: 'open-sans',
+                              color: Colors.black38,
+                            ),
+                      )
+                    : Container(),
+              ],
             )
           : Column(
               children: <Widget>[

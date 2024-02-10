@@ -25,8 +25,8 @@ class SelectOrganizationViewModelWidget extends StatelessWidget {
     this.child,
     this.focusNode,
     this.autoFocus,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
   final GlobalKey qrKey;
   final FocusNode? focusNode;
   final bool? autoFocus;
@@ -79,7 +79,7 @@ void main() {
     org = OrgInfo(
       id: '3',
       name: 'test org 3',
-      isPublic: true,
+      userRegistrationRequired: false,
       creatorInfo: User(firstName: 'test', lastName: '1'),
     );
     locator.registerSingleton(Queries());
@@ -259,12 +259,12 @@ void main() {
         joinedOrganizations: [
           OrgInfo(
             id: '1',
-          )
+          ),
         ],
         membershipRequests: [
           OrgInfo(
             id: '1',
-          )
+          ),
         ],
       );
 
@@ -272,7 +272,8 @@ void main() {
 
       expect(selectOrganizationViewModel.selectedOrganization, org);
     });
-    testWidgets('Test for successful selectOrg function when org is private',
+    testWidgets(
+        'Test for successful selectOrg function when org requires userRegistration',
         (WidgetTester tester) async {
       locator.registerSingleton<UserConfig>(_MockUserConfig());
       final selectOrganizationViewModel = SelectOrganizationViewModel();
@@ -282,7 +283,7 @@ void main() {
           qrKey: selectOrganizationViewModel.qrKey,
         ),
       );
-      org.isPublic = false;
+      org.userRegistrationRequired = true;
       selectOrganizationViewModel.selectedOrganization = org;
 
       when(databaseFunctions.gqlAuthMutation(queries.joinOrgById(org.id!)))
@@ -305,12 +306,12 @@ void main() {
         joinedOrganizations: [
           OrgInfo(
             id: '1',
-          )
+          ),
         ],
         membershipRequests: [
           OrgInfo(
             id: '1',
-          )
+          ),
         ],
       );
 
@@ -351,7 +352,7 @@ void main() {
         membershipRequests: [
           OrgInfo(
             id: '1',
-          )
+          ),
         ],
       );
       _userLoggedIn = true;
@@ -383,7 +384,7 @@ void main() {
         joinedOrganizations: [
           OrgInfo(
             id: '1',
-          )
+          ),
         ],
         membershipRequests: [org],
       );
@@ -441,7 +442,6 @@ void main() {
         navigationService.showTalawaErrorSnackBar(
           'Select one organization to continue',
           MessageType.warning,
-          duration: const Duration(milliseconds: 750),
         ),
       );
     });
@@ -538,7 +538,7 @@ void main() {
     });
 
     /// we no longer have the tap button to join a org
-    // testWidgets('Test for successful onTapJoin function when isPublic is false',
+    // testWidgets('Test for successful onTapJoin function when userRegistrationRequired is false',
     //     (WidgetTester tester) async {
     //   locator.registerSingleton<UserConfig>(_MockUserConfig());
     //   final selectOrganizationViewModel = SelectOrganizationViewModel();
@@ -549,7 +549,7 @@ void main() {
     //     ),
     //   );
     //
-    //   org.isPublic = false;
+    //   org.userRegistrationRequired = false;
     //   selectOrganizationViewModel.selectedOrganization = org;
     //   _user = User(joinedOrganizations: []);
     //
@@ -584,7 +584,7 @@ void main() {
     //   );
     // });
     // testWidgets(
-    //     'Test for successful onTapJoin function when isPublic is false and joined orgnazation is not empty',
+    //     'Test for successful onTapJoin function when userRegistrationRequired is false and joined orgnazation is not empty',
     //     (WidgetTester tester) async {
     //   locator.registerSingleton<UserConfig>(_MockUserConfig());
     //   final selectOrganizationViewModel = SelectOrganizationViewModel();
@@ -595,7 +595,7 @@ void main() {
     //     ),
     //   );
     //
-    //   org.isPublic = false;
+    //   org.userRegistrationRequired = false;
     //   selectOrganizationViewModel.selectedOrganization = org;
     //   _user = User(joinedOrganizations: [org]);
     //
@@ -631,7 +631,7 @@ void main() {
     //   );
     // });
     // testWidgets(
-    //     'Test for successful onTapJoin function when isPublic is false and result is null',
+    //     'Test for successful onTapJoin function when userRegistrationRequired is false and result is null',
     //     (WidgetTester tester) async {
     //   locator.registerSingleton<UserConfig>(_MockUserConfig());
     //   final selectOrganizationViewModel = SelectOrganizationViewModel();
@@ -642,7 +642,7 @@ void main() {
     //     ),
     //   );
     //
-    //   org.isPublic = false;
+    //   org.userRegistrationRequired = false;
     //   selectOrganizationViewModel.selectedOrganization = org;
     //
     //   when(
@@ -673,7 +673,7 @@ void main() {
     //   );
     // });
     testWidgets(
-        'Test for successful onTapJoin function when isPublic is true and throws exception',
+        'Test for successful onTapJoin function when userRegistrationRequired is false and throws exception',
         (WidgetTester tester) async {
       locator.registerSingleton<UserConfig>(_MockUserConfig());
       final selectOrganizationViewModel = SelectOrganizationViewModel();
@@ -700,7 +700,7 @@ void main() {
       verify(databaseFunctions.gqlAuthMutation(queries.joinOrgById(org.id!)));
     });
     // testWidgets(
-    //     'Test for successful onTapJoin function when isPublic is false and throws exception',
+    //     'Test for successful onTapJoin function when userRegistrationRequired is false and throws exception',
     //     (WidgetTester tester) async {
     //   locator.registerSingleton<UserConfig>(_MockUserConfig());
     //   final selectOrganizationViewModel = SelectOrganizationViewModel();
@@ -710,7 +710,7 @@ void main() {
     //       qrKey: selectOrganizationViewModel.qrKey,
     //     ),
     //   );
-    //   org.isPublic = false;
+    //   org.userRegistrationRequired = false;
     //
     //   selectOrganizationViewModel.selectedOrganization = org;
     //
@@ -744,10 +744,16 @@ void main() {
         (FetchMoreOptions options) async {
           expected = options.updateQuery(
             <String, dynamic>{
-              "organizationsConnection": [1, 2]
+              "organizationsConnection": [
+                {"one": 1},
+                {"two": 2},
+              ],
             },
             <String, dynamic>{
-              "organizationsConnection": [3, 4]
+              "organizationsConnection": [
+                {"three": 3},
+                {"four": 4},
+              ],
             },
           );
           return Future.value(
@@ -761,7 +767,12 @@ void main() {
       );
 
       expect(expected, {
-        'organizationsConnection': [1, 2, 3, 4]
+        'organizationsConnection': [
+          {"one": 1},
+          {"two": 2},
+          {"three": 3},
+          {"four": 4},
+        ],
       });
     });
   });

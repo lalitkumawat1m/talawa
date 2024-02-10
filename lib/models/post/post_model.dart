@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_dynamic_calls
-
 import 'package:talawa/models/organization/org_info.dart';
 import 'package:talawa/models/user/user_info.dart';
 
@@ -10,6 +8,7 @@ class Post {
     this.description,
     this.createdAt,
     this.imageUrl,
+    this.base64String,
     this.videoUrl,
     required this.creator,
     this.organization,
@@ -29,6 +28,7 @@ class Post {
     description = json['text'] as String?;
     createdAt = DateTime.parse(json['createdAt'] as String);
     imageUrl = json['imageUrl'] as String?;
+    base64String = json['base64String'] as String?;
     videoUrl = json['videoUrl'] as String?;
     creator = json['creator'] != null
         ? User.fromJson(json['creator'] as Map<String, dynamic>, fromOrg: true)
@@ -38,13 +38,13 @@ class Post {
         : null;
     if (json['likedBy'] != null) {
       likedBy = <LikedBy>[];
-      json['likedBy'].forEach((v) {
+      (json['likedBy'] as List).forEach((v) {
         likedBy?.add(LikedBy.fromJson(v as Map<String, dynamic>));
       });
     }
     if (json['comments'] != null) {
       comments = <Comments>[];
-      json['comments'].forEach((v) {
+      (json['comments'] as List).forEach((v) {
         comments?.add(Comments.fromJson(v as Map<String, dynamic>));
       });
     }
@@ -61,6 +61,9 @@ class Post {
 
   /// imageUrl for post.
   String? imageUrl;
+
+  /// base64String for Image.
+  String? base64String;
 
   /// videoUrl for post.
   String? videoUrl;

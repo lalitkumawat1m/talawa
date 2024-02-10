@@ -1,6 +1,3 @@
-// ignore_for_file: talawa_api_doc, avoid_dynamic_calls
-// ignore_for_file: talawa_good_doc_comments
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -10,14 +7,16 @@ import 'package:talawa/enums/enums.dart';
 import 'package:talawa/locator.dart';
 import 'package:talawa/models/organization/org_info.dart';
 import 'package:talawa/models/user/user_info.dart';
+import 'package:talawa/widgets/custom_progress_dialog.dart';
 
-/// UserConfig class provides different services in the context of the User.
+/// Provides different services in the context of the User.
 ///
 /// Services include:
 /// * `userLoggedIn` : helps to make user logged in to the application.
 /// * `updateUserJoinedOrg` : helps to update the user joined organization.
 /// * `updateUserCreatedOrg` : helps to update the user created organization.
-/// * `updateUserMemberRequestOrg` : helps to update the User membership request for the organization.
+/// * `updateUserMemberRequestOrg` : helps to update the User membership
+/// request for the organization.
 /// * `updateUserAdminOrg` : helps to update the Admin of the Organization.
 /// * `updateAccessToken` : helps to update the access token of an user.
 /// * `updateUser` : helps to update the user.
@@ -29,24 +28,52 @@ class UserConfig {
   final StreamController<OrgInfo> _currentOrgInfoController =
       StreamController<OrgInfo>.broadcast();
 
+  /// Retrieves the stream of current organization information.
   Stream<OrgInfo> get currentOrgInfoStream => _currentOrgInfoStream;
+
+  /// Retrieves the stream controller for current organization information.
   StreamController<OrgInfo> get currentOrgInfoController =>
       _currentOrgInfoController;
 
+  /// Retrieves the current organization information.
   OrgInfo get currentOrg => _currentOrg!;
+
+  /// Retrieves the name of the current organization.
   String get currentOrgName => _currentOrg!.name!;
+
+  /// Checks if a user is logged in.
+  bool get loggedIn => _currentUser?.id != 'null';
+
+  /// Updates the current organization information.
   set currentOrg(OrgInfo org) => _currentOrg = org;
+
+  /// Retrieves the current user.
   User get currentUser => _currentUser!;
+
+  /// Updates the current user.
   set currentUser(User user) {
     _currentUser = user;
   }
 
+  /// initialise.
+  ///
+  /// **params**:
+  ///   None
+  ///
+  /// **returns**:
+  ///   None
   void initialiseStream() {
     _currentOrgInfoStream =
         _currentOrgInfoController.stream.asBroadcastStream();
   }
 
   /// This function is used to log in the user.
+  ///
+  /// **params**:
+  ///   None
+  ///
+  /// **returns**:
+  /// * `Future<bool>`: returns future of bool type.
   Future<bool> userLoggedIn() async {
     initialiseStream();
     final boxUser = Hive.box<User>('currentUser');
@@ -56,6 +83,7 @@ class UserConfig {
     _currentOrgInfoController.add(_currentOrg!);
 
     _currentUser = boxUser.get('user');
+
     // if there is not currentUser then returns false.
     if (_currentUser == null) {
       _currentUser = User(id: 'null', authToken: 'null');
@@ -69,8 +97,9 @@ class UserConfig {
           queries.fetchUserInfo,
           variables: {'id': currentUser.id},
         ) as QueryResult;
+        final List users = result.data!['users'] as List;
         final User userInfo = User.fromJson(
-          result.data!['users'][0] as Map<String, dynamic>,
+          users[0] as Map<String, dynamic>,
           fromOrg: true,
         );
         userInfo.authToken = userConfig.currentUser.authToken;
@@ -80,6 +109,7 @@ class UserConfig {
         _currentOrgInfoController.add(_currentOrg!);
 
         saveUserInHive();
+
         return true;
       } on Exception catch (e) {
         print(e);
@@ -92,48 +122,107 @@ class UserConfig {
     return true;
   }
 
-  /// This function is used to update the user joined organization.
+  /// Logs out the current user.
   ///
-  /// params:
-  /// * [orgDetails] : details of the organization that user joined.
-  Future updateUserJoinedOrg(List<OrgInfo> orgDetails) async {
+  /// **params**:
+  ///   None
+  ///
+  /// **returns**:
+  /// * `Future<bool>`: returns future of bool type.
+  Future<bool> userLogOut() async {
+    try {
+      final result = await databaseFunctions.gqlAuthMutation(queries.logout())
+          as QueryResult?;
+      if (result != null && result.data!['logout'] == true) {
+        navigationService.pop();
+        navigationService.pushDialog(
+          const CustomProgressDialog(
+            key: Key('LogoutProgress'),
+          ),
+        );
+        // throw StateError('error');
+
+        final user = Hive.box<User>('currentUser');
+        final url = Hive.box('url');
+        // final androidFirebaseOptionsBox = Hive.box('androidFirebaseOptions');
+        // final iosFirebaseOptionsBox = Hive.box('iosFirebaseOptions');
+        final organisation = Hive.box<OrgInfo>('currentOrg');
+        await user.clear();
+        await url.clear();
+        // androidFirebaseOptionsBox.clear();
+        // iosFirebaseOptionsBox.clear();
+        // try {
+        //   Firebase.app()
+        //       .delete(); // Deleting app will stop all Firebase plugins
+        // } catch (e) {
+        //   debugPrint("ERROR: Unable to delete firebase app $e");
+        // }
+        await organisation.clear();
+        _currentUser = User(id: 'null', authToken: 'null');
+      }
+    } catch (e) {
+      return false;
+    }
+    return true;
+  }
+
+  /// Updates the user joined organization.
+  ///
+  /// **params**:
+  /// * `orgDetails`: details of the organization that user joined.
+  ///
+  /// **returns**:
+  /// * `Future<void>`: returns future of void type.
+  Future<void> updateUserJoinedOrg(List<OrgInfo> orgDetails) async {
     _currentUser!.updateJoinedOrg(orgDetails);
     saveUserInHive();
   }
 
-  /// This function is used to update the user created organization.
+  /// Updates the user created organization.
   ///
-  /// params:
-  /// * [orgDetails] : details of the organization that user created.
-  Future updateUserCreatedOrg(List<OrgInfo> orgDetails) async {
+  /// **params**:
+  /// * `orgDetails`: details of the organization that user joined.
+  ///
+  /// **returns**:
+  /// * `Future<void>`: returns future of void type.
+  Future<void> updateUserCreatedOrg(List<OrgInfo> orgDetails) async {
     _currentUser!.updateCreatedOrg(orgDetails);
     saveUserInHive();
   }
 
-  /// This function is used to update the user request to join the organization.
+  /// Updates the user request to join the organization.
   ///
-  /// params:
-  /// * [orgDetails] : details of the organization that user requested to join.
-  Future updateUserMemberRequestOrg(List<OrgInfo> orgDetails) async {
+  /// **params**:
+  /// * `orgDetails`: details of the organization that user joined.
+  ///
+  /// **returns**:
+  /// * `Future<void>`: returns future of void type.
+  Future<void> updateUserMemberRequestOrg(List<OrgInfo> orgDetails) async {
     _currentUser!.updateMemberRequestOrg(orgDetails);
     saveUserInHive();
   }
 
-  /// This function is used to update the organization admin.
+  /// Updates the organization admin.
   ///
-  /// params:
-  /// * [orgDetails] : details of the organization.
-  Future updateUserAdminOrg(List<OrgInfo> orgDetails) async {
+  /// **params**:
+  /// * `orgDetails`: details of the organization that user joined.
+  ///
+  /// **returns**:
+  /// * `Future<void>`: returns future of void type.
+  Future<void> updateUserAdminOrg(List<OrgInfo> orgDetails) async {
     _currentUser!.updateAdminFor(orgDetails);
     saveUserInHive();
   }
 
-  /// This function is used to updated the access token of the user.
+  /// Updates the access token of the user.
   ///
-  /// params:
-  /// * [accessToken]
-  /// * [refreshToken]
-  Future updateAccessToken({
+  /// **params**:
+  /// * `accessToken`: current user's accesstoken.
+  /// * `refreshToken`: current user's refreshtoken.
+  ///
+  /// **returns**:
+  /// * `Future<void>`: returns future of void type.
+  Future<void> updateAccessToken({
     required String accessToken,
     required String refreshToken,
   }) async {
@@ -142,10 +231,14 @@ class UserConfig {
     saveUserInHive();
   }
 
-  /// This function is used to update the user details.
+  /// Updates the user details.
   ///
-  /// params:
-  /// * [updatedUserDetails] : `User` type variable containing all the details of an user need to be updated.
+  /// **params**:
+  /// * `updatedUserDetails`: `User` type variable containing
+  ///  all the details of an user need to be updated.
+  ///
+  /// **returns**:
+  /// * `Future<bool>`: returns future of bool type.
   Future<bool> updateUser(User updatedUserDetails) async {
     try {
       _currentUser = updatedUserDetails;
@@ -159,7 +252,13 @@ class UserConfig {
     }
   }
 
-  // save user in hive.
+  /// save user in hive.
+  ///
+  /// **params**:
+  ///   None
+  ///
+  /// **returns**:
+  ///   None
   void saveUserInHive() {
     final box = Hive.box<User>('currentUser');
     if (box.get('user') == null) {
@@ -169,7 +268,13 @@ class UserConfig {
     }
   }
 
-  // save current organization details in hive.
+  /// save current organization details in hive.
+  ///
+  /// **params**:
+  /// * `saveOrgAsCurrent`: instance of OrgInfo
+  ///
+  /// **returns**:
+  ///   None
   void saveCurrentOrgInHive(OrgInfo saveOrgAsCurrent) {
     _currentOrg = saveOrgAsCurrent;
     _currentOrgInfoController.add(_currentOrg!);

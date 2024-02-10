@@ -27,16 +27,6 @@ void main() {
       }
       expect(mutation, true);
     });
-    test("Check if saveFcmToken works correctly", () {
-      var mutation = false;
-      expect(mutation, false);
-
-      final fnData = Queries().saveFcmToken('token123');
-      if (fnData.contains('token123')) {
-        mutation = true;
-      }
-      expect(mutation, true);
-    });
     test("Check if logout works correctly", () {
       const mutation = false;
       expect(mutation, false);
@@ -210,6 +200,18 @@ void main() {
         12,
       );
       if (fnData.contains('userId')) {
+        mutation = true;
+      }
+      expect(mutation, true);
+    });
+    test("Check if updateUserProfile works correctly", () {
+      var mutation = false;
+      expect(mutation, false);
+
+      final fnData = Queries().updateUserProfile();
+
+      if (fnData.contains('mutation UpdateUserProfile') &&
+          fnData.contains('updateUserProfile')) {
         mutation = true;
       }
       expect(mutation, true);

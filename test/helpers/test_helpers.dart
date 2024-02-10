@@ -25,6 +25,7 @@ import 'package:talawa/services/comment_service.dart';
 import 'package:talawa/services/database_mutation_functions.dart';
 import 'package:talawa/services/event_service.dart';
 import 'package:talawa/services/graphql_config.dart';
+import 'package:talawa/services/image_service.dart';
 import 'package:talawa/services/navigation_service.dart';
 import 'package:talawa/services/org_service.dart';
 import 'package:talawa/services/post_service.dart';
@@ -53,6 +54,8 @@ import 'package:talawa/view_model/theme_view_model.dart';
 import 'package:talawa/view_model/widgets_view_models/custom_drawer_view_model.dart';
 import 'package:talawa/view_model/widgets_view_models/like_button_view_model.dart';
 import 'package:talawa/view_model/widgets_view_models/progress_dialog_view_model.dart';
+import '../service_tests/image_service_test.dart';
+import '../views/main_screen_test.dart';
 import 'test_helpers.mocks.dart';
 
 @GenerateMocks(
@@ -81,6 +84,9 @@ import 'test_helpers.mocks.dart';
     MockSpec<ExploreEventsViewModel>(
       onMissingStub: OnMissingStub.returnDefault,
     ),
+    MockSpec<OrganizationFeedViewModel>(
+      onMissingStub: OnMissingStub.returnDefault,
+    ),
     MockSpec<Validator>(onMissingStub: OnMissingStub.returnDefault),
     MockSpec<QRViewController>(onMissingStub: OnMissingStub.returnDefault),
     MockSpec<CommentService>(onMissingStub: OnMissingStub.returnDefault),
@@ -89,7 +95,7 @@ import 'test_helpers.mocks.dart';
     MockSpec<CreateEventViewModel>(onMissingStub: OnMissingStub.returnDefault),
     MockSpec<DirectChatViewModel>(onMissingStub: OnMissingStub.returnDefault),
     MockSpec<ImageCropper>(onMissingStub: OnMissingStub.returnDefault),
-    MockSpec<ImagePicker>(onMissingStub: OnMissingStub.returnDefault)
+    MockSpec<ImagePicker>(onMissingStub: OnMissingStub.returnDefault),
   ],
 )
 final User member1 = User(id: "testMem1");
@@ -108,7 +114,7 @@ final fakeOrgInfo = OrgInfo(
     firstName: "ravidi",
     lastName: "shaikh",
   ),
-  isPublic: false,
+  userRegistrationRequired: true,
 );
 
 void _removeRegistrationIfExists<T extends Object>() {
@@ -126,6 +132,7 @@ NavigationService getAndRegisterNavigationService() {
   when(service.pushScreen(any, arguments: anyNamed('arguments')))
       .thenAnswer((_) async {});
   when(service.popAndPushScreen(any, arguments: '-1')).thenAnswer((_) async {});
+  when(service.pushDialog(any)).thenAnswer((_) async {});
   locator.registerSingleton<NavigationService>(service);
   return service;
 }
@@ -191,7 +198,7 @@ ChatService getAndRegisterChatService() {
             firstName: 'test',
             id: '1',
             image: 'fakeHttp',
-          )
+          ),
         ],
         '1',
       ),
@@ -204,6 +211,9 @@ ChatService getAndRegisterChatService() {
 AppLanguage getAndRegisterAppLanguage() {
   _removeRegistrationIfExists<AppLanguage>();
   final service = MockAppLanguage();
+
+  when(service.appLocal).thenReturn(const Locale('en'));
+
   locator.registerSingleton<AppLanguage>(service);
   return service;
 }
@@ -229,14 +239,17 @@ GraphqlConfig getAndRegisterGraphqlConfig() {
   });
 
   when(service.authClient()).thenAnswer((realInvocation) {
-    final AuthLink authLink =
-        AuthLink(getToken: () async => 'Bearer ${GraphqlConfig.token}');
-    final Link finalAuthLink = authLink.concat(service.httpLink);
-    return GraphQLClient(
-      cache: GraphQLCache(partialDataPolicy: PartialDataCachePolicy.accept),
-      link: finalAuthLink,
-    );
+    // final AuthLink authLink =
+    //     AuthLink(getToken: () async => 'Bearer ${GraphqlConfig.token}');
+    // final Link finalAuthLink = authLink.concat(service.httpLink);
+    // return GraphQLClient(
+    //   cache: GraphQLCache(partialDataPolicy: PartialDataCachePolicy.accept),
+    //   link: finalAuthLink,
+    // );
+    return locator<GraphQLClient>();
   });
+
+  when(service.getToken()).thenAnswer((_) async => "sample_token");
 
   locator.registerSingleton<GraphqlConfig>(service);
   return service;
@@ -250,19 +263,33 @@ GraphQLClient getAndRegisterGraphQLClient() {
   // Either fill this with mock data or override this stub
   // and return null
 
-  // when(service.query(QueryOptions(
-  //   document: gql(queries.getPluginsList()),
-  // ))).thenAnswer(
-  //   (realInvocation) async {
-  //     return QueryResult.internal(
-  //       source: QueryResultSource.network,
-  //       parserFn: (data) => {},
-  //       data: {
-  //         "getPlugins": [],
-  //       },
-  //     );
-  //   },
-  // );
+  when(service.query(any)).thenAnswer(
+    (realInvocation) async {
+      if (locator.isRegistered<GraphQLClient>()) {
+        return Future.value(
+          QueryResult<Map<String, dynamic>>(
+            source: QueryResultSource.network,
+            data: {
+              "getPlugins": null,
+            },
+            options: QueryOptions(
+              document: gql(queries.getPluginsList()),
+            ),
+          ),
+        );
+      } else {
+        return Future.value(
+          QueryResult<Map<String, dynamic>>(
+            source: QueryResultSource.network,
+            data: null,
+            options: QueryOptions(
+              document: gql(queries.getPluginsList()),
+            ),
+          ),
+        );
+      }
+    },
+  );
 
   when(service.defaultPolicies).thenAnswer(
     (realInvocation) => DefaultPolicies(),
@@ -300,6 +327,14 @@ UserConfig getAndRegisterUserConfig() {
     (realInvocation) => Future<bool>.value(false),
   );
 
+  when(service.currentUser).thenReturn(
+    User(
+      id: 'id',
+      firstName: 'john',
+      lastName: 'snow',
+    ),
+  );
+
   //Mock Data for current organizaiton.
   when(service.currentOrg).thenReturn(
     OrgInfo(
@@ -331,13 +366,13 @@ UserConfig getAndRegisterUserConfig() {
         OrgInfo(
           id: '3',
           name: 'test org 3',
-          isPublic: true,
+          userRegistrationRequired: false,
           creatorInfo: User(firstName: 'test', lastName: '1'),
         ),
         OrgInfo(
           id: '4',
           name: 'test org 4',
-          isPublic: false,
+          userRegistrationRequired: true,
           creatorInfo: User(firstName: 'test', lastName: '2'),
         ),
         OrgInfo(
@@ -349,15 +384,15 @@ UserConfig getAndRegisterUserConfig() {
         OrgInfo(
           id: '1',
           name: 'test org',
-          isPublic: false,
+          userRegistrationRequired: true,
           creatorInfo: User(firstName: 'test', lastName: 'test'),
         ),
         OrgInfo(
           id: '2',
           name: 'test org',
-          isPublic: false,
+          userRegistrationRequired: true,
           creatorInfo: User(firstName: 'test', lastName: 'test'),
-        )
+        ),
       ],
     ),
   );
@@ -397,6 +432,13 @@ ImageCropper getAndRegisterImageCropper() {
   _removeRegistrationIfExists<ImageCropper>();
   final service = MockImageCropper();
   locator.registerLazySingleton<ImageCropper>(() => service);
+  return service;
+}
+
+ImageService getAndRegisterImageService() {
+  _removeRegistrationIfExists<ImageService>();
+  final service = MockImageService();
+  locator.registerLazySingleton<ImageService>(() => service);
   return service;
 }
 
@@ -465,7 +507,7 @@ EventService getAndRegisterEventService() {
             id: "xzy1",
             firstName: "Test",
             lastName: "User",
-          )
+          ),
         ],
         isPublic: true,
         organization: OrgInfo(id: 'XYZ'),
@@ -551,7 +593,7 @@ CreateEventViewModel getAndRegisterCreateEventModel() {
     id: "fakeUser1",
     firstName: 'r',
     lastName: 'p',
-    image: 'www.image.com',
+    // image: 'www.image.com',
   );
 
   final mapType = {user1.id!: true};
@@ -570,6 +612,10 @@ CreateEventViewModel getAndRegisterCreateEventModel() {
   when(cachedViewModel.removeUserFromList(userId: "fakeUser1"))
       .thenAnswer((realInvocation) async {
     when(cachedViewModel.selectedMembers).thenReturn([]);
+  });
+
+  when(cachedViewModel.createEvent()).thenAnswer((realInvocation) async {
+    print('called');
   });
 
   // when(cachedViewModel.removeUserFromList(userId: "fakeUser2"))
@@ -594,7 +640,7 @@ DirectChatViewModel getAndRegisterDirectChatViewModel() {
   final ChatMessage chatMessage2 =
       ChatMessage("XYZ", chatUser1, "Something", chatUser2);
   final Map<String, List<ChatMessage>> messages = {
-    "XYZ": [chatMessage1]
+    "XYZ": [chatMessage1],
   };
   final ChatListTileDataModel chatListTileDataModel1 =
       ChatListTileDataModel([chatUser1, chatUser2], "XYZ");
@@ -616,6 +662,31 @@ DirectChatViewModel getAndRegisterDirectChatViewModel() {
   when(cachedViewModel.chatName("XYZ")).thenAnswer((realInvocation) {});
 
   locator.registerSingleton<DirectChatViewModel>(cachedViewModel);
+  return cachedViewModel;
+}
+
+ExploreEventsViewModel getAndRegisterExploreEventsViewModel() {
+  _removeRegistrationIfExists<ExploreEventsViewModel>();
+  final cachedViewModel = MockExploreEventsViewModel();
+
+  const String chosenValue = 'All Events';
+  const String emptyListMessage = "Looks like there aren't any events.";
+
+  final EventService mockEventService = EventService();
+
+  when(cachedViewModel.eventService).thenReturn(mockEventService);
+  when(cachedViewModel.chosenValue).thenReturn(chosenValue);
+  when(cachedViewModel.emptyListMessage).thenReturn(emptyListMessage);
+
+  locator.registerSingleton<ExploreEventsViewModel>(cachedViewModel);
+  return cachedViewModel;
+}
+
+MainScreenViewModel getAndRegisterMainViewModel() {
+  _removeRegistrationIfExists<MainScreenViewModel>();
+  final cachedViewModel = MockMainScreenViewModel();
+
+  locator.registerSingleton<MainScreenViewModel>(cachedViewModel);
   return cachedViewModel;
 }
 

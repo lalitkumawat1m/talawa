@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:talawa/enums/enums.dart';
 import 'package:talawa/locator.dart';
 import 'package:talawa/services/navigation_service.dart';
 import 'package:talawa/services/size_config.dart';
 import 'package:talawa/utils/app_localization.dart';
+import 'package:talawa/utils/validators.dart';
 import 'package:talawa/view_model/after_auth_view_models/event_view_models/create_event_view_model.dart';
+import 'package:talawa/view_model/main_screen_view_model.dart';
 import 'package:talawa/views/after_auth_screens/events/create_event_form.dart';
 import 'package:talawa/views/base_view.dart';
 import 'package:talawa/widgets/add_members_bottom_sheet.dart';
@@ -13,7 +16,7 @@ import 'package:talawa/widgets/member_name_tile.dart';
 
 /// CreateEventPage returns a widget that has mutable state _CreateEventPageState.
 class CreateEventPage extends StatefulWidget {
-  const CreateEventPage({Key? key}) : super(key: key);
+  const CreateEventPage({super.key});
 
   @override
   _CreateEventPageState createState() => _CreateEventPageState();
@@ -52,8 +55,14 @@ class _CreateEventPageState extends State<CreateEventPage> {
             ),
             actions: [
               TextButton(
+                key: const Key('addButton'),
                 onPressed: () {
-                  model.createEvent();
+                  if (userConfig.loggedIn) {
+                    model.createEvent();
+                  } else {
+                    navigationService.pop();
+                    MainScreenViewModel.scaffoldKey.currentState?.openDrawer();
+                  }
                 },
                 child: Text(
                   AppLocalizations.of(context)!.strictTranslate('Add'),
@@ -90,7 +99,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                 .strictTranslate("Add Image"),
                             style: subtitleTextStyle,
                           ),
-                        )
+                        ),
                       ],
                     ),
                     // If the image for the event is selected or not null.
@@ -116,7 +125,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                       color: Colors.black,
                                     ),
                                   ),
-                                )
+                                ),
                               ],
                             ),
                           )
@@ -160,13 +169,26 @@ class _CreateEventPageState extends State<CreateEventPage> {
                         });
                       },
                       setTime: () async {
+                        print(model.eventStartDate);
                         final time = await customTimePicker(
                           initialTime: model.eventStartTime,
                         );
-
-                        setState(() {
-                          model.eventStartTime = time;
-                        });
+                        // print(model.eventStartTime);
+                        final validationError = Validator.validateEventTime(
+                          time,
+                          model.eventEndTime,
+                        );
+                        print('hi');
+                        if (validationError != null) {
+                          navigationService.showTalawaErrorSnackBar(
+                            'Start time must be before end time',
+                            MessageType.error,
+                          );
+                        } else {
+                          setState(() {
+                            model.eventStartTime = time;
+                          });
+                        }
                       },
                     ),
                     SizedBox(
@@ -207,22 +229,21 @@ class _CreateEventPageState extends State<CreateEventPage> {
                         final time = await customTimePicker(
                           initialTime: model.eventEndTime,
                         );
-                        final currTimeToInt = time.hour + time.minute / 60.0;
-                        final startTime = model.eventStartTime;
-                        final startTimeToInt =
-                            startTime.hour + startTime.minute / 60;
-                        final eventStartDate = model.eventStartDate;
-                        final eventEndDate = model.eventEndDate;
-                        if (startTimeToInt.compareTo(currTimeToInt) < 0 &&
-                            eventStartDate.compareTo(eventEndDate) < 0) {
+                        final validationError = Validator.validateEventTime(
+                          model.eventStartTime,
+                          time,
+                        );
+                        final showSnackBar =
+                            navigationService.showTalawaErrorSnackBar;
+                        if (validationError != null) {
+                          showSnackBar(
+                            'Start time must be before end time',
+                            MessageType.error,
+                          );
+                        } else {
                           setState(() {
                             model.eventEndTime = time;
                           });
-                        } else {
-                          // ignore: undefined_method
-                          navigationServiceLocal.showSnackBar(
-                            "End time cannot be before the start time. ",
-                          );
                         }
                       },
                     ),
@@ -239,7 +260,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                           AppLocalizations.of(context)!
                               .strictTranslate('Does not repeat'),
                           style: subtitleTextStyle,
-                        )
+                        ),
                       ],
                     ),
                     SizedBox(height: SizeConfig.screenHeight! * 0.026),
@@ -314,11 +335,15 @@ class _CreateEventPageState extends State<CreateEventPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("Add Members", style: subtitleTextStyle),
+                          Text(
+                            AppLocalizations.of(context)!
+                                .strictTranslate("Add Members"),
+                            style: subtitleTextStyle,
+                          ),
                           Icon(
                             Icons.add,
                             color: Theme.of(context).colorScheme.secondary,
-                          )
+                          ),
                         ],
                       ),
                     ),

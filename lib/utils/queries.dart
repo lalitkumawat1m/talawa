@@ -1,9 +1,18 @@
-// ignore_for_file: talawa_api_doc
-// ignore_for_file: talawa_good_doc_comments
-
 ///This class returns some queries for the application.
 class Queries {
   //Returns a query to register a user.
+
+  /// Mutation to register a user.
+  ///
+  ///
+  /// **params**:
+  /// * `firstName`: user's data.
+  /// * `lastName`: user's data.
+  /// * `email`: user's data.
+  /// * `password`: user's data.
+  ///
+  /// **returns**:
+  /// * `String`: Return the mutation in string type to be passed to graphql client.
   String registerUser(
     String firstName,
     String lastName,
@@ -26,7 +35,7 @@ class Queries {
                   name
                   image
                   description
-                  isPublic
+                  userRegistrationRequired
                   creator{
                     _id
                     firstName
@@ -39,7 +48,7 @@ class Queries {
                   name
                   image
                   description
-                  isPublic
+                  userRegistrationRequired
                   creator{
                     _id
                     firstName
@@ -53,7 +62,7 @@ class Queries {
                     name
                     image
                     description
-                    isPublic
+                    userRegistrationRequired
                     creator{
                       _id
                       firstName
@@ -73,6 +82,14 @@ class Queries {
   }
 
   //Returns a query to login the user
+  /// mutation to login the user.
+  ///
+  /// **params**:
+  /// * `email`: user's data
+  /// * `password`: user's data
+  ///
+  /// **returns**:
+  /// * `String`: mutation in string form, to be passed on to graphql client.
   String loginUser(String email, String password) {
     return """
         mutation {
@@ -89,7 +106,7 @@ class Queries {
                 name
                 image
                 description
-                isPublic
+                userRegistrationRequired
                 creator{
                   _id
                   firstName
@@ -102,7 +119,7 @@ class Queries {
                 name
                 image
                 description
-                isPublic
+                userRegistrationRequired
                 creator{
                   _id
                   firstName
@@ -116,7 +133,7 @@ class Queries {
                   name
                   image
                   description
-                  isPublic
+                  userRegistrationRequired
                   creator{
                     _id
                     firstName
@@ -130,35 +147,44 @@ class Queries {
               }
             }
             refreshToken
-            androidFirebaseOptions {
-              apiKey
-              appId
-              messagingSenderId
-              projectId
-              storageBucket
-            }
-            iosFirebaseOptions {
-              apiKey
-              appId
-              messagingSenderId
-              projectId
-              storageBucket
-              iosClientId
-              iosBundleId
-            }
+            
           }
         }
     """;
   }
 
-  String saveFcmToken(String? token) {
-    return """
-        mutation {
-          saveFcmToken(token: "$token")
+  /// to update user profile.
+  ///
+  /// **params**:
+  ///   None
+  ///
+  /// **returns**:
+  /// * `String`: return a mutation
+  String updateUserProfile() {
+    return """  
+      mutation UpdateUserProfile(
+        \$firstName: String
+        \$lastName: String
+        \$email: EmailAddress
+        \$file: String
+      ) {
+      updateUserProfile(
+        data: { firstName: \$firstName, lastName: \$lastName, email: \$email }
+        file: \$file
+      ) {
+        _id
         }
+      }
     """;
   }
 
+  /// logout muiation.
+  ///
+  /// **params**:
+  ///   None
+  ///
+  /// **returns**:
+  /// * `String`: simple mutation
   String logout() {
     return """
         mutation {
@@ -167,6 +193,8 @@ class Queries {
     """;
   }
 
+  /// getter for joined org.
+  ///
   String get fetchJoinInOrg {
     return """
     query organizationsConnection(\$first: Int, \$skip: Int){
@@ -179,7 +207,7 @@ class Queries {
         _id
         name
         image
-        isPublic
+        userRegistrationRequired
         creator{
           firstName
           lastName
@@ -189,6 +217,7 @@ class Queries {
 """;
   }
 
+  /// getter for fetchJoinInOrgByName.
   String get fetchJoinInOrgByName {
     return """
     query organizationsConnection(
@@ -200,7 +229,7 @@ class Queries {
         where:{
           name_starts_with: \$nameStartsWith,
           visibleInSearch: true,
-          isPublic: true,
+          userRegistrationRequired: true,
         }
         first: \$first,
         skip: \$skip,
@@ -210,7 +239,7 @@ class Queries {
         _id
         name
         image
-        isPublic
+        userRegistrationRequired
         creator{
           firstName
           lastName
@@ -220,6 +249,14 @@ class Queries {
 """;
   }
 
+  /// make mutation string for joiining org by ord.id.
+  ///
+  ///
+  /// **params**:
+  /// * `orgId`: refer org object.
+  ///
+  /// **returns**:
+  /// * `String`: returns a string for client
   String joinOrgById(String orgId) {
     return '''
     mutation {
@@ -229,7 +266,7 @@ class Queries {
             name
             image
             description
-            isPublic
+            userRegistrationRequired
             creator{
               _id
               firstName
@@ -243,6 +280,14 @@ class Queries {
   ''';
   }
 
+  /// mutation to send the member request.
+  ///
+  ///
+  /// **params**:
+  /// * `orgId`: refer org object
+  ///
+  /// **returns**:
+  /// * `String`: mutation in string form, to be passed on to graphql client.
   String sendMembershipRequest(String orgId) {
     return '''
       mutation {
@@ -252,7 +297,7 @@ class Queries {
               name
               image
               description
-              isPublic
+              userRegistrationRequired
               creator{
                 _id
                 firstName
@@ -265,6 +310,7 @@ class Queries {
   ''';
   }
 
+  /// mutation in string form, to be passed on to graphql client..
   String fetchUserInfo = ''' 
        query Users(\$id: ID!){
           users(where: { id: \$id }) {
@@ -278,7 +324,7 @@ class Queries {
               name
               image
               description
-              isPublic
+              userRegistrationRequired
               creator{
                 _id
                 firstName
@@ -292,7 +338,7 @@ class Queries {
               name
               image
               description
-              isPublic
+              userRegistrationRequired
               creator{
                 _id
                 firstName
@@ -305,7 +351,7 @@ class Queries {
                 _id
                 name
                 image
-                isPublic
+                userRegistrationRequired
                 creator{
                   _id
                   firstName
@@ -321,6 +367,13 @@ class Queries {
         }
     ''';
 
+  /// mutation for refresh token.
+  ///
+  /// **params**:
+  /// * `refreshToken`: related to auth, token based authentication, mutation to refresh the token
+  ///
+  /// **returns**:
+  /// * `String`: mutation in string form, to be passed on to graphql client.
   String refreshToken(String refreshToken) {
     return '''
         mutation{
@@ -332,6 +385,13 @@ class Queries {
     ''';
   }
 
+  /// lang update mutation.
+  ///
+  /// **params**:
+  /// * `languageCode`: lang code to identify the lang, refer lang jsons
+  ///
+  /// **returns**:
+  /// * `String`: mutation in string form, to be passed on to graphql client.
   String updateLanguage(String languageCode) {
     return '''
         mutation {
@@ -344,6 +404,14 @@ class Queries {
     ''';
   }
 
+  /// fetching org details with the help of id.
+  ///
+  ///
+  /// **params**:
+  /// * `orgId`: Org identifier
+  ///
+  /// **returns**:
+  /// * `String`: mutation in string form, to be passed on to graphql client.
   String fetchOrgById(String orgId) {
     return '''
     query{
@@ -352,7 +420,7 @@ class Queries {
         _id
         name
         image
-        isPublic
+        userRegistrationRequired
         creator{
           firstName
           lastName
@@ -362,6 +430,14 @@ class Queries {
   ''';
   }
 
+  /// query to fetch user lang.
+  ///
+  ///
+  /// **params**:
+  ///   None
+  ///
+  /// **returns**:
+  /// * `String`: query in string form, to be passed on to graphql client.
   String userLanguage() {
     return '''
     query{
@@ -370,6 +446,14 @@ class Queries {
   ''';
   }
 
+  /// query for new user language .
+  ///
+  ///
+  /// **params**:
+  /// * `userId`: user identifier
+  ///
+  /// **returns**:
+  /// * `String`: query in string form, to be passed on to graphql client.
   String newUserLanguage(String userId) {
     return '''
     query{
@@ -378,6 +462,13 @@ class Queries {
   ''';
   }
 
+  /// query to fetch org details.
+  ///
+  /// **params**:
+  /// * `orgId`: org identifier
+  ///
+  /// **returns**:
+  /// * `String`: query in string form, to be passed on to graphql client.
   String fetchOrgDetailsById(String orgId) {
     return '''
     query{
@@ -389,7 +480,7 @@ class Queries {
           _id
         }
         description
-        isPublic
+        userRegistrationRequired
         creator{
           _id
           firstName
@@ -406,7 +497,14 @@ class Queries {
   ''';
   }
 
-  ///`getPluginList` queries all properties of  pluginList from the server
+  ///`getPluginList` queries all properties of  pluginList from the server.
+  ///
+  ///
+  /// **params**:
+  ///   None
+  ///
+  /// **returns**:
+  /// * `String`: query in string form, to be passed on to graphql client.
   String getPluginsList() {
     return '''
 query  {
@@ -422,7 +520,20 @@ query  {
   ''';
   }
 
-  /// `createDonation` creates a new donation transaction by taking the userId ,orgId ,nameOfOrg ,nameOfUser as parameters
+  /// `createDonation` creates a new donation transaction by taking the userId ,orgId ,nameOfOrg ,nameOfUser as parameters.
+  ///
+  /// more_info_if_required
+  ///
+  /// **params**:
+  /// * `userId`: user identifier
+  /// * `orgId`: org identifier
+  /// * `nameOfOrg`: org data
+  /// * `nameOfUser`: user data
+  /// * `payPalId`: for payment
+  /// * `amount`: amount
+  ///
+  /// **returns**:
+  /// * `String`: mutation in string form, to be passed on to graphql client.
   String createDonation(
     String userId,
     String orgId,

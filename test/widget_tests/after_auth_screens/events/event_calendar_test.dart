@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:talawa/locator.dart';
 import 'package:talawa/models/events/event_model.dart';
 import 'package:talawa/views/after_auth_screens/events/event_calendar.dart';
@@ -16,10 +17,10 @@ Widget createEventCalendar() {
       Event(
         title: 'Test',
         startDate: '07/14/2022',
-        startTime: '7:00 PM',
+        startTime: '14:23:01',
         endDate: '07/14/2022',
-        endTime: '8:00 PM',
-      )
+        endTime: '21:23:01',
+      ),
     ]),
   );
 }
@@ -27,6 +28,27 @@ Widget createEventCalendar() {
 void main() {
   setUp(() {
     registerServices();
+  });
+  group("Test for _parseTime function", () {
+    test("Test parsing valid time string", () {
+      const timeString = "5:30 PM";
+      final parsedTime = parseTime(timeString);
+      final expectedTime = DateFormat("h:mm a").parse(timeString);
+      expect(parsedTime, expectedTime);
+    });
+    test("Test for invalid time string", () {
+      const timeString = "invalid String ";
+
+      expect(() => parseTime(timeString), throwsException);
+    });
+    test("Test parsing  string in hms format", () {
+      const timeString = "12:12:12";
+
+      final parsedTime = parseTime(timeString);
+      final expectTime = DateFormat('Hms').parse(timeString);
+
+      expect(expectTime, parsedTime);
+    });
   });
   group('Tests for EventCalendar', () {
     testWidgets('Testing if EventCalendar shows up', (tester) async {

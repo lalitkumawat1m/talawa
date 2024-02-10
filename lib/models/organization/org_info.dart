@@ -1,6 +1,3 @@
-// ignore_for_file: talawa_api_doc
-// ignore_for_file: talawa_good_doc_comments
-
 import 'package:hive/hive.dart';
 import 'package:talawa/models/user/user_info.dart';
 
@@ -17,7 +14,7 @@ class OrgInfo {
     this.description,
     this.id,
     this.image,
-    this.isPublic,
+    this.userRegistrationRequired,
     this.name,
   });
 
@@ -37,7 +34,9 @@ class OrgInfo {
       name: json['name'] != null ? json['name'] as String? : null,
       description:
           json['description'] != null ? json['description'] as String? : null,
-      isPublic: json['isPublic'] != null ? json['isPublic'] as bool? : null,
+      userRegistrationRequired: json['userRegistrationRequired'] != null
+          ? json['userRegistrationRequired'] as bool?
+          : null,
       creatorInfo: json['creator'] != null
           ? User.fromJson(
               json['creator'] as Map<String, dynamic>,
@@ -61,29 +60,65 @@ class OrgInfo {
     );
   }
 
-  List<OrgInfo> fromJsonToList(List<dynamic> json) {
+  /// The conventional function to parse json, check flutter docs to know more.
+  ///
+  ///
+  /// **params**:
+  /// * `json`: Passing the json to be parsed.
+  ///
+  /// **returns**:
+  /// * `List<OrgInfo>`: returning the OrgInfo object containing the json data
+  List<OrgInfo> fromJsonToList(dynamic json) {
     final List<OrgInfo> orgList = [];
-    json.forEach((element) {
-      final OrgInfo org = OrgInfo.fromJson(element as Map<String, dynamic>);
-      orgList.add(org);
-    });
+
+    if (json is List) {
+      for (final dynamic outerElement in json) {
+        if (outerElement is List) {
+          for (final dynamic innerElement in outerElement) {
+            if (innerElement is Map<String, dynamic>) {
+              final OrgInfo org = OrgInfo.fromJson(innerElement);
+              orgList.add(org);
+            }
+          }
+        } else if (outerElement is Map<String, dynamic>) {
+          final OrgInfo org = OrgInfo.fromJson(outerElement);
+          orgList.add(org);
+        }
+      }
+    }
+
     return orgList;
   }
 
+  /// contains the Image url.
   @HiveField(0)
   String? image;
+
+  /// The org id.
   @HiveField(1)
   String? id;
+
+  /// The org name.
   @HiveField(2)
   String? name;
+
+  /// The org admins.
   @HiveField(3)
   List<User>? admins;
+
+  /// The org name.
   @HiveField(4)
   List<User>? members;
+
+  /// The org descriptions.
   @HiveField(5)
   String? description;
+
+  /// The org registration is required.
   @HiveField(6)
-  bool? isPublic;
+  bool? userRegistrationRequired;
+
+  /// The org creatorInfo.
   @HiveField(7)
   User? creatorInfo;
 }

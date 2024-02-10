@@ -1,6 +1,3 @@
-// ignore_for_file: talawa_api_doc
-// ignore_for_file: talawa_good_doc_comments
-
 import 'package:flutter/material.dart';
 import 'package:talawa/models/post/post_model.dart';
 import 'package:talawa/widgets/post_widget.dart';
@@ -8,12 +5,24 @@ import 'package:talawa/widgets/post_widget.dart';
 /// This class receives a List of all the Post widgets and returns a ListView.
 class PostListWidget extends StatelessWidget {
   const PostListWidget({
-    Key? key,
+    super.key,
     required this.posts,
     this.function,
-  }) : super(key: key);
+    this.deletePost,
+  });
+
+  /// lis of all the post.
+  ///
   final List<Post> posts;
+
+  /// This function is passed for the handling the action to be performed when the comment button is clicked.
+  ///
+  /// to see the function check the place where the widget is called.
   final Function(Post)? function;
+
+  /// Function the deleting the post.
+  ///
+  final Function(Post)? deletePost;
 
   @override
   Widget build(BuildContext context) {
@@ -26,16 +35,11 @@ class PostListWidget extends StatelessWidget {
         return Column(
           children: [
             NewsPost(
+              key: ValueKey(posts[index].sId),
               post: posts[index],
               function: function,
+              deletePost: deletePost,
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 10.0),
-              child: Divider(
-                height: 8,
-                thickness: 8,
-              ),
-            )
           ],
         );
       },

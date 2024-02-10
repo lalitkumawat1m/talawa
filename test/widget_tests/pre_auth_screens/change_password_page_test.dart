@@ -100,7 +100,7 @@ void main() {
               "${AppLocalizations.of(navigationService.navigatorKey.currentContext!)!.translate("Hello")}, ",
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
-              .headlineSmall
+              .headlineSmall,
         },
         {
           'text':
@@ -108,21 +108,21 @@ void main() {
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
               .titleLarge!
-              .copyWith(fontSize: 24)
+              .copyWith(fontSize: 24),
         },
         {
           'text':
               "${AppLocalizations.of(navigationService.navigatorKey.currentContext!)!.translate("we've")} ",
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
-              .headlineSmall
+              .headlineSmall,
         },
         {
           'text':
               '${AppLocalizations.of(navigationService.navigatorKey.currentContext!)!.translate("got you covered")} ',
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
-              .headlineSmall
+              .headlineSmall,
         },
       ];
 
@@ -168,6 +168,7 @@ void main() {
       //inputting a invalid pass in the field
       await tester.enterText(passInputFieldWidget, 'nontext');
       //submitting the field with invalid input
+      await tester.ensureVisible(findChangePassButton);
       await tester.tap(findChangePassButton);
       await tester.pumpAndSettle(const Duration(milliseconds: 500));
       //testing the invalidPassSubmission widget appears
@@ -224,7 +225,7 @@ void main() {
               "${AppLocalizations.of(navigationService.navigatorKey.currentContext!)!.translate("Hello")}, ",
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
-              .headlineSmall
+              .headlineSmall,
         },
         {
           'text':
@@ -232,21 +233,21 @@ void main() {
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
               .titleLarge!
-              .copyWith(fontSize: 24)
+              .copyWith(fontSize: 24),
         },
         {
           'text':
               "${AppLocalizations.of(navigationService.navigatorKey.currentContext!)!.translate("we've")} ",
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
-              .headlineSmall
+              .headlineSmall,
         },
         {
           'text':
               '${AppLocalizations.of(navigationService.navigatorKey.currentContext!)!.translate("got you covered")} ',
           'textStyle': Theme.of(navigationService.navigatorKey.currentContext!)
               .textTheme
-              .headlineSmall
+              .headlineSmall,
         },
       ];
 
@@ -291,6 +292,7 @@ void main() {
       //inputting a invalid pass in the field
       await tester.enterText(passInputFieldWidget, 'nontext');
       //submitting the field with invalid input
+      await tester.ensureVisible(findRecoverButton);
       await tester.tap(findRecoverButton);
       await tester.pumpAndSettle(const Duration(milliseconds: 500));
       //testing the invalidPassSubmission widget appears

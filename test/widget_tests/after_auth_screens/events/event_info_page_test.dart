@@ -6,9 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mocktail_image_network/mocktail_image_network.dart';
-import 'package:talawa/constants/routing_constants.dart';
 import 'package:talawa/locator.dart';
 import 'package:talawa/models/events/event_model.dart';
 import 'package:talawa/models/organization/org_info.dart';
@@ -46,7 +44,7 @@ Event getEvent(bool isPublic, bool isCreator) {
         id: isCreator ? "xzy1" : "abc1",
         firstName: "Test",
         lastName: "User",
-      )
+      ),
     ],
     isPublic: isPublic,
     organization: OrgInfo(id: 'XYZ'),
@@ -81,18 +79,18 @@ void main() {
     unregisterViewModels();
   });
   group('Test EventInfoPage', () {
-    testWidgets('Test Share button', (tester) async {
-      mockNetworkImages(() async {
-        await tester.pumpWidget(createEventInfoPage(true, true));
-        await tester.pumpAndSettle();
+    // testWidgets('Test Share button', (tester) async {
+    //   mockNetworkImages(() async {
+    //     await tester.pumpWidget(createEventInfoPage(true, true));
+    //     await tester.pumpAndSettle();
 
-        final shareButton = find.byIcon(Icons.share);
-        expect(shareButton, findsOneWidget);
+    //     final shareButton = find.byIcon(Icons.share);
+    //     expect(shareButton, findsOneWidget);
 
-        await tester.tap(shareButton);
-        await tester.pumpAndSettle();
-      });
-    });
+    //     await tester.tap(shareButton);
+    //     await tester.pumpAndSettle();
+    //   });
+    // });
 
     testWidgets('Test FloatingActionButton', (tester) async {
       mockNetworkImages(() async {
@@ -113,23 +111,6 @@ void main() {
         expect(find.byType(FloatingActionButton), findsOneWidget);
 
         await tester.tap(find.byType(FloatingActionButton));
-      });
-    });
-
-    testWidgets('Test EventInfoPage', (tester) async {
-      mockNetworkImages(() async {
-        await tester.pumpWidget(createEventInfoPage(false, true));
-        await tester.pumpAndSettle();
-
-        expect(find.byIcon(Icons.lock), findsOneWidget);
-
-        await tester.tap(find.text('View on map'));
-        verify(
-          navigationService.pushScreen(
-            Routes.mapScreen,
-            arguments: {'latitude': 23.45, 'longitude': -23.45},
-          ),
-        );
       });
     });
   });

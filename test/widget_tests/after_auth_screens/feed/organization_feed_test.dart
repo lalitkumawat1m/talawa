@@ -5,17 +5,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:talawa/models/post/post_model.dart';
 import 'package:talawa/router.dart';
 import 'package:talawa/services/navigation_service.dart';
-import 'package:talawa/services/post_service.dart';
 import 'package:talawa/services/size_config.dart';
 import 'package:talawa/utils/app_localization.dart';
+import 'package:talawa/view_model/after_auth_view_models/feed_view_models/organization_feed_view_model.dart';
 import 'package:talawa/view_model/lang_view_model.dart';
 import 'package:talawa/view_model/main_screen_view_model.dart';
 import 'package:talawa/views/after_auth_screens/feed/organization_feed.dart';
 import 'package:talawa/views/base_view.dart';
+import 'package:talawa/widgets/post_list_widget.dart';
 
 import '../../../helpers/test_helpers.dart';
+import '../../../helpers/test_helpers.mocks.dart';
 import '../../../helpers/test_locator.dart';
 
 Widget createOrganizationFeedScreen({
@@ -55,7 +58,6 @@ Widget createOrganizationFeedScreen({
 // late OrganizationFeedViewModel _organizationFeedViewModel;
 
 Widget createOrganizationFeedScreen2({
-  bool isPublic = true,
   bool viewOnMap = true,
   required MainScreenViewModel homeModel,
 }) {
@@ -92,103 +94,162 @@ Widget createOrganizationFeedScreen2({
   );
 }
 
+final post = Post(
+  sId: "test_post_id",
+  creator: userConfig.currentUser,
+  likedBy: [],
+  description: 'Testing',
+  comments: [Comments(sId: 'cmmnt1')],
+  createdAt: DateTime.now(),
+  organization: userConfig.currentOrg,
+);
+
 void main() {
   SizeConfig().test();
   testSetupLocator();
-  // locator.registerSingleton(LikeButtonViewModel());
+  late MockOrganizationFeedViewModel mockViewModel;
 
   setUp(() {
     registerServices();
+    mockViewModel = MockOrganizationFeedViewModel();
+    locator.unregister<OrganizationFeedViewModel>();
+    locator.registerSingleton<OrganizationFeedViewModel>(mockViewModel);
+  });
+  tearDown(() {
+    unregisterServices();
   });
 
   TestWidgetsFlutterBinding.ensureInitialized();
-  testWidgets('check if createOrganizationFeedScreen shows up', (tester) async {
-    final model = locator<MainScreenViewModel>();
-    await tester.pumpWidget(createOrganizationFeedScreen(homeModel: model));
-    await tester.pump();
+  group('tests for Organizaiton feed Screen', () {
+    testWidgets('check if orgname is displayed shows up', (tester) async {
+      when(mockViewModel.currentOrgName).thenReturn('testOrg');
+      when(mockViewModel.isFetchingPosts).thenReturn(true);
+      when(mockViewModel.initialise()).thenReturn(null);
+      when(mockViewModel.userPosts).thenReturn([]);
+      final model = locator<MainScreenViewModel>();
+      await tester.pumpWidget(createOrganizationFeedScreen(homeModel: model));
+      await tester.pump();
 
-    final finder = find.byType(Scaffold);
+      final finder = find.text('testOrg');
+      expect(finder, findsOneWidget);
+    });
+    testWidgets('check if side drawer shows up', (tester) async {
+      when(mockViewModel.currentOrgName).thenReturn('testOrg');
+      when(mockViewModel.isFetchingPosts).thenReturn(true);
+      when(mockViewModel.initialise()).thenReturn(null);
+      when(mockViewModel.userPosts).thenReturn([]);
+      final model = locator<MainScreenViewModel>();
+      await tester.pumpWidget(createOrganizationFeedScreen(homeModel: model));
+      await tester.pump();
 
-    expect(finder, findsNWidgets(2));
-  });
-  testWidgets('check if orgname is displayed shows up', (tester) async {
-    final model = locator<MainScreenViewModel>();
-    await tester.pumpWidget(createOrganizationFeedScreen(homeModel: model));
-    await tester.pump();
+      final finder = find.byIcon(Icons.menu);
 
-    final finder = find.byType(Text);
-    expect(finder, findsNWidgets(4));
-    // expect(text, findsOneWidget);
-  });
-  testWidgets('check if pinned post is displayed shows up', (tester) async {
-    final model = locator<MainScreenViewModel>();
-    await tester.pumpWidget(createOrganizationFeedScreen(homeModel: model));
-    await tester.pump();
+      await tester.tap(finder);
+      await tester.pump();
+    });
+    testWidgets('check if Circular Indicator shows up when fetching posts',
+        (tester) async {
+      when(mockViewModel.currentOrgName).thenReturn('testOrg');
+      when(mockViewModel.isFetchingPosts).thenReturn(true);
+      when(mockViewModel.initialise()).thenReturn(null);
+      when(mockViewModel.userPosts).thenReturn([]);
+      final model = locator<MainScreenViewModel>();
+      await tester.pumpWidget(createOrganizationFeedScreen(homeModel: model));
+      await tester.pump();
 
-    final finder = find.byType(Text);
-
-    final text1 = find.text('Rutvik Chandla');
-
-    final text2 = find.text(
-      'Flutter is Google’s mobile UI framework for crafting high-quality native interfaces on iOS...',
-    );
-
-    final text3 = find.text('See all Pinned news');
-
-    expect(text1, findsOneWidget);
-
-    expect(text2, findsOneWidget);
-
-    expect(text3, findsOneWidget);
-
-    expect(finder, findsNWidgets(4));
-  });
-  testWidgets('check if side drawer shows up', (tester) async {
-    final model = locator<MainScreenViewModel>();
-    await tester.pumpWidget(createOrganizationFeedScreen(homeModel: model));
-    await tester.pump();
-
-    final finder = find.byIcon(Icons.menu);
-
-    await tester.tap(finder);
-    await tester.pump();
-  });
-  testWidgets('check if post shows up when  model.posts.isNotEmpty is true',
-      (tester) async {
-    final model = locator<MainScreenViewModel>();
-    await tester.pumpWidget(createOrganizationFeedScreen(homeModel: model));
-    await tester.pump();
-
-    final finder = find.byIcon(Icons.menu);
-
-    await tester.tap(finder);
-    await tester.pump();
-  });
-  testWidgets('check if refresh indicator is launched on dragging',
-      (tester) async {
-    final model = locator<MainScreenViewModel>();
-    await tester.pumpWidget(createOrganizationFeedScreen(homeModel: model));
-    await tester.pump();
-    final postservice = locator<PostService>();
-    bool refreshed = false;
-
-    when(postservice.getPosts()).thenAnswer((_) async {
-      refreshed = true;
+      final finder = find.byType(CircularProgressIndicator);
+      expect(finder, findsOneWidget);
     });
 
-    await tester.drag(
-      find.byType(RefreshIndicator),
-      const Offset(0, 200),
-    );
-    await tester.pumpAndSettle();
+    testWidgets('check if refresh Indicator works fine', (tester) async {
+      when(mockViewModel.currentOrgName).thenReturn('testOrg');
+      when(mockViewModel.isFetchingPosts).thenReturn(false);
+      when(mockViewModel.isBusy).thenReturn(false);
+      when(mockViewModel.initialise()).thenReturn(null);
+      when(mockViewModel.posts).thenReturn([post]);
+      when(mockViewModel.pinnedPosts).thenReturn([post]);
+      final model = locator<MainScreenViewModel>();
 
-    expect(refreshed, true);
-  });
-  testWidgets(
-      'check if post shows up when  model.posts.isNotEmpty is true and post',
-      (tester) async {
-    final model = locator<MainScreenViewModel>();
-    await tester.pumpWidget(createOrganizationFeedScreen2(homeModel: model));
-    await tester.pumpAndSettle(const Duration(seconds: 1));
+      await tester.pumpWidget(createOrganizationFeedScreen(homeModel: model));
+      await tester.pump();
+
+      bool refreshed = false;
+      when(mockViewModel.fetchNewPosts()).thenAnswer((_) async {
+        refreshed = true;
+      });
+      await tester.drag(
+        find.byType(RefreshIndicator),
+        const Offset(0, 400),
+      );
+      await tester.pumpAndSettle();
+
+      expect(refreshed, true);
+    });
+
+    testWidgets('check if pinned posts shows up if not empty', (tester) async {
+      when(mockViewModel.currentOrgName).thenReturn('testOrg');
+      when(mockViewModel.isFetchingPosts).thenReturn(false);
+      when(mockViewModel.isBusy).thenReturn(false);
+      when(mockViewModel.initialise()).thenReturn(null);
+      when(mockViewModel.posts).thenReturn([post]);
+      when(mockViewModel.pinnedPosts).thenReturn([post]);
+
+      final model = locator<MainScreenViewModel>();
+      await tester.pumpWidget(createOrganizationFeedScreen2(homeModel: model));
+      await tester.pumpAndSettle();
+
+      final finder = find.byKey(const Key('pinnedPosts'));
+      expect(finder, findsOneWidget);
+    });
+    testWidgets('check if posts shows up if not empty', (tester) async {
+      when(mockViewModel.currentOrgName).thenReturn('testOrg');
+      when(mockViewModel.isFetchingPosts).thenReturn(false);
+      when(mockViewModel.isBusy).thenReturn(false);
+      when(mockViewModel.initialise()).thenReturn(null);
+      when(mockViewModel.posts).thenReturn([post]);
+      when(mockViewModel.pinnedPosts).thenReturn([post]);
+
+      final model = locator<MainScreenViewModel>();
+      await tester.pumpWidget(createOrganizationFeedScreen2(homeModel: model));
+      await tester.pumpAndSettle();
+
+      final finder = find.byType(PostListWidget);
+      expect(finder, findsOneWidget);
+    });
+    testWidgets('check if no posts shows up then No posts text is there',
+        (tester) async {
+      when(mockViewModel.currentOrgName).thenReturn('testOrg');
+      when(mockViewModel.isFetchingPosts).thenReturn(false);
+      when(mockViewModel.isBusy).thenReturn(false);
+      when(mockViewModel.initialise()).thenReturn(null);
+      when(mockViewModel.posts).thenReturn([]);
+      when(mockViewModel.pinnedPosts).thenReturn([post]);
+
+      final model = locator<MainScreenViewModel>();
+      await tester.pumpWidget(createOrganizationFeedScreen2(homeModel: model));
+      await tester.pumpAndSettle();
+
+      final finder = find.text('There are no posts in this organization');
+      expect(finder, findsOneWidget);
+    });
+    testWidgets(
+        'check if no posts shows up then create post textButton is present',
+        (tester) async {
+      when(mockViewModel.currentOrgName).thenReturn('testOrg');
+      when(mockViewModel.isFetchingPosts).thenReturn(false);
+      when(mockViewModel.isBusy).thenReturn(false);
+      when(mockViewModel.initialise()).thenReturn(null);
+      when(mockViewModel.posts).thenReturn([]);
+      when(mockViewModel.pinnedPosts).thenReturn([post]);
+
+      final model = locator<MainScreenViewModel>();
+      await tester.pumpWidget(createOrganizationFeedScreen2(homeModel: model));
+      await tester.pumpAndSettle();
+
+      final finder = find.text('Create your first post');
+      expect(finder, findsOneWidget);
+      await tester.tap(finder);
+      await tester.pumpAndSettle();
+    });
   });
 }

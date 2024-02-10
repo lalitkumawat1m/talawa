@@ -1,6 +1,4 @@
 // ignore_for_file: talawa_api_doc
-// ignore_for_file: talawa_good_doc_comments
-
 import 'dart:async';
 
 import 'package:talawa/locator.dart';
@@ -10,8 +8,8 @@ import 'package:talawa/services/post_service.dart';
 import 'package:talawa/services/user_config.dart';
 import 'package:talawa/view_model/base_view_model.dart';
 
-/// LikeButtonViewModel class helps to serve the data and
-/// to react to user's input for Like Button Widget.
+/// LikeButtonViewModel class helps to serve the data and to react to user's input for Like Button Widget.
+///
 ///
 /// Methods include:
 /// * `toggleIsLiked`
@@ -31,11 +29,19 @@ class LikeButtonViewModel extends BaseModel {
   // ignore: unused_field
   late StreamSubscription _updatePostSubscription;
 
-  // Getters
+  ///Getters.
   bool get isLiked => _isLiked;
   List<LikedBy> get likedBy => _likedBy;
   int get likesCount => _likedBy.length;
-  // initialize
+
+  /// First function to initialize the ViewModel.
+  ///
+  /// **params**:
+  /// * `likedBy`: List of LikedBy Objects
+  /// * `postID`: Post Id of the Post
+  ///
+  /// **returns**:
+  ///   None
   void initialize(List<LikedBy> likedBy, String postID) {
     _postID = postID;
     _user = _userConfig.currentUser;
@@ -46,25 +52,38 @@ class LikeButtonViewModel extends BaseModel {
         _postService.updatedPostStream.listen((post) => updatePost(post));
   }
 
-  /// This function add like to the post if not liked and
-  /// remove the like from the post if liked.
+  /// function to toggleisLiked boolean.
+  ///
+  /// **params**:
+  ///   None
+  ///
+  /// **returns**:
+  ///   None
   void toggleIsLiked() {
     if (!_isLiked) {
       _postService.addLike(_postID);
-    } else {
-      _postService.removeLike(_postID);
     }
   }
 
-  /// This function set `_isLike` to true.
+  /// function to set isLiked boolean.
+  ///
+  /// **params**:
+  /// * `val`: value to set bool to.
+  ///
+  /// **returns**:
+  ///   None
   void setIsLiked({bool val = true}) {
     _isLiked = val;
     notifyListeners();
   }
 
-  /*TODO: This function must be removed bec the checking, that the user 
-          has liked the post or not must  be send from the backend and not 
-          the processing should be done in front end.*/
+  /// function to set isLiked boolean and check.
+  ///
+  /// **params**:
+  ///   None
+  ///
+  /// **returns**:
+  ///   None
   void checkAndSetTheIsLiked() {
     setIsLiked(val: false);
     for (var i = 0; i < _likedBy.length; i++) {
@@ -74,10 +93,13 @@ class LikeButtonViewModel extends BaseModel {
     }
   }
 
-  /// This function updates the Post.
+  /// function to update the Post.
   ///
-  /// params:
-  /// `post` : `Post` type, the post that need to be updated.
+  /// **params**:
+  /// * `post`: Post Object
+  ///
+  /// **returns**:
+  ///   None
   void updatePost(Post post) {
     if (_postID == post.sId) {
       _likedBy = post.likedBy!;

@@ -1,9 +1,5 @@
-// ignore_for_file: talawa_api_doc
-// ignore_for_file: talawa_good_doc_comments
-
+// ignore_for_file: talawa_good_doc_comments, talawa_api_doc
 import 'package:flutter/material.dart';
-import 'package:talawa/constants/routing_constants.dart';
-import 'package:talawa/locator.dart';
 import 'package:talawa/services/size_config.dart';
 import 'package:talawa/utils/app_localization.dart';
 import 'package:talawa/utils/validators.dart';
@@ -12,7 +8,7 @@ import 'package:talawa/view_model/after_auth_view_models/event_view_models/creat
 /// CreateEventForm returns a widget of a Form for creating events in the organization.
 /// This widget is used in CreateEventPage widget.
 class CreateEventForm extends StatelessWidget {
-  const CreateEventForm({Key? key, required this.model}) : super(key: key);
+  const CreateEventForm({super.key, required this.model});
   final CreateEventViewModel model;
   @override
   Widget build(BuildContext context) {
@@ -33,7 +29,8 @@ class CreateEventForm extends StatelessWidget {
             validator: (value) => Validator.validateEventForm(value!, 'Title'),
             decoration: InputDecoration(
               // placeholder of the text field
-              labelText: 'Add Event Title',
+              labelText: AppLocalizations.of(context)!
+                  .strictTranslate('Add Event Title'),
               isDense: true,
               labelStyle: Theme.of(context).textTheme.titleMedium,
               focusedBorder: InputBorder.none,
@@ -65,32 +62,14 @@ class CreateEventForm extends StatelessWidget {
             validator: (value) =>
                 Validator.validateEventForm(value!, 'Location'),
             decoration: InputDecoration(
-              hintText: 'Where is the event?',
-              labelText: 'Add Location',
+              hintText: AppLocalizations.of(context)!
+                  .strictTranslate('Where is the event?'),
+              labelText:
+                  AppLocalizations.of(context)!.strictTranslate('Add Location'),
               labelStyle: Theme.of(context).textTheme.titleMedium,
               border: InputBorder.none,
               focusedBorder: InputBorder.none,
               enabledBorder: InputBorder.none,
-              suffix: GestureDetector(
-                key: const Key('gesture_cef_test'),
-                onTap: () => navigationService.pushScreen(
-                  Routes.mapScreen,
-                  arguments: {
-                    'model': model,
-                    // initalize the map screen with a marker at this location
-                    'latitude': 37.42796133580664,
-                    'longitude': -122.085749655962,
-                  },
-                ),
-                child: Text(
-                  AppLocalizations.of(context)!
-                      .strictTranslate('Choose on map'),
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall!
-                      .copyWith(fontSize: 16),
-                ),
-              ),
               prefixIcon: Container(
                 transform: Matrix4.translationValues(
                   -SizeConfig.screenWidth! * 0.027,
@@ -118,8 +97,10 @@ class CreateEventForm extends StatelessWidget {
             maxLines: 10,
             minLines: 1,
             decoration: InputDecoration(
-              hintText: 'Describe the event',
-              labelText: 'Add Description',
+              hintText: AppLocalizations.of(context)!
+                  .strictTranslate('Describe the event'),
+              labelText: AppLocalizations.of(context)!
+                  .strictTranslate('Add Description'),
               labelStyle: Theme.of(context).textTheme.titleMedium,
               border: InputBorder.none,
               focusedBorder: InputBorder.none,

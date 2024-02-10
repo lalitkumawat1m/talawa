@@ -1,6 +1,3 @@
-// ignore_for_file: talawa_api_doc
-// ignore_for_file: talawa_good_doc_comments
-
 import 'package:flutter/material.dart';
 import 'package:talawa/locator.dart';
 import 'package:talawa/models/organization/org_info.dart';
@@ -17,6 +14,8 @@ import 'package:talawa/widgets/signup_progress_indicator.dart';
 class SignUpDetails extends StatefulWidget {
   const SignUpDetails({required Key key, required this.selectedOrg})
       : super(key: key);
+
+  /// Details of selected Organisation.
   final OrgInfo selectedOrg;
   @override
   _SignUpDetailsState createState() => _SignUpDetailsState();
@@ -48,6 +47,7 @@ class _SignUpDetailsState extends State<SignUpDetails> {
           body: Padding(
             padding: EdgeInsets.only(top: SizeConfig.safeBlockVertical! * 6),
             child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -84,7 +84,7 @@ class _SignUpDetailsState extends State<SignUpDetails> {
                                 textInputAction: TextInputAction.next,
                                 keyboardType: TextInputType.text,
                                 autofillHints: const <String>[
-                                  AutofillHints.givenName
+                                  AutofillHints.givenName,
                                 ],
                                 enableSuggestions: true,
                                 validator: (value) {
@@ -122,7 +122,7 @@ class _SignUpDetailsState extends State<SignUpDetails> {
                                 textInputAction: TextInputAction.next,
                                 keyboardType: TextInputType.text,
                                 autofillHints: const <String>[
-                                  AutofillHints.familyName
+                                  AutofillHints.familyName,
                                 ],
                                 enableSuggestions: true,
                                 validator: (value) {
@@ -159,7 +159,7 @@ class _SignUpDetailsState extends State<SignUpDetails> {
                                 textInputAction: TextInputAction.next,
                                 keyboardType: TextInputType.emailAddress,
                                 autofillHints: const <String>[
-                                  AutofillHints.email
+                                  AutofillHints.email,
                                 ],
                                 enableSuggestions: true,
                                 validator: (value) {
@@ -192,7 +192,7 @@ class _SignUpDetailsState extends State<SignUpDetails> {
                                 keyboardType: TextInputType.visiblePassword,
                                 obscureText: model.hidePassword,
                                 autofillHints: const <String>[
-                                  AutofillHints.password
+                                  AutofillHints.password,
                                 ],
                                 enableSuggestions: true,
                                 validator: (value) {
@@ -246,7 +246,7 @@ class _SignUpDetailsState extends State<SignUpDetails> {
                                 keyboardType: TextInputType.text,
                                 enableSuggestions: true,
                                 autofillHints: const <String>[
-                                  AutofillHints.password
+                                  AutofillHints.password,
                                 ],
                                 obscureText: model.hidePassword,
                                 validator: (value) {
@@ -291,7 +291,7 @@ class _SignUpDetailsState extends State<SignUpDetails> {
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

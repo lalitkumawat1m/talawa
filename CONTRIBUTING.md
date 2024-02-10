@@ -59,11 +59,10 @@ Make sure you are following [issue report guidelines](ISSUE_GUIDELINES.md) avail
 
 #### Branching Strategy
 
-For Talawa, we had employed the following branching strategy to simplify the development process and to ensure that only stable code is pushed to the `master` branch:
+For Talawa, we had employed the following branching strategy to simplify the development process and to ensure that only stable code is pushed to the `main` branch:
 
 - `develop`: For unstable code and bug fixing
-- `alpha-x.x.x`: For stability testing
-- `master`: Where the stable production ready code lies
+- `main`: Where the stable production ready code lies. This is our default branch.
 
 #### Conflict Resolution
 
@@ -81,26 +80,20 @@ Code contributions to Talawa come in the form of pull requests. These are done b
 The process of proposing a change to Talawa can be summarized as:
 
 1. Fork the Talawa repository and branch off `develop`.
-
-1. The repository can be cloned locally using `git clone <forked repo url>`.
-
+1. Your newly forked repository can be cloned locally using `git clone <YOUR FORKED REPO URL>`.
+1. Make the Palisadoes Foundation's repo your `git upstream` for your local repo.
 1. Make the desired changes to the Talawa source.
-
 1. Setup a local instance of Talawa-API on your local machine using the steps outlined in our [INSTALLATION.md](INSTALLATION.md) file.
-
 1. Run the app:
    1. Enter Talawa-API URL for your local instance oulined in the [INSTALLATION.md](INSTALLATION.md) file. This is also the URL you should use for your Talawa-Admin configuration.
-
-1. While selecting organization, select organization named A as it contains some testable data.
-
 1. Test your changes.
-
 1. If you've added code, then test suites must be added. 
    1. **_General_:** 
       1. We need to get to 100% test coverage for the app. We periodically increase the desired test coverage for our pull requests to meet this goal.
       1. Pull requests that don't meet the minimum test coverage levels will not be accepted. This may mean that you will have to create tests for code you did not write. You can decide which part of the code base needs additional tests if this happens to you.
    1. **_Testing_:**
       1. Test using the `flutter test` command.
+      1. Review [Flutter's official introduction to unit testing](https://docs.flutter.dev/cookbook/testing/unit/introduction)
       1. Here are some useful flutter test videos
           1. [State Management With Provider](https://www.raywenderlich.com/6373413-state-management-with-provider)
           1. [Unit Testing With Flutter: Getting Started](https://www.raywenderlich.com/6926998-unit-testing-with-flutter-getting-started)

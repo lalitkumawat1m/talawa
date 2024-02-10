@@ -1,223 +1,232 @@
-// ignore_for_file: talawa_api_doc
-// ignore_for_file: talawa_good_doc_comments
-
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:talawa/models/post/post_model.dart';
+import 'package:talawa/services/graphql_config.dart';
 import 'package:talawa/utils/app_localization.dart';
 import 'package:talawa/view_model/widgets_view_models/like_button_view_model.dart';
 import 'package:talawa/views/base_view.dart';
 import 'package:talawa/widgets/custom_avatar.dart';
+import 'package:talawa/widgets/multi_reaction.dart';
+import 'package:talawa/widgets/post_container.dart';
 import 'package:talawa/widgets/post_detailed_page.dart';
-import 'package:talawa/widgets/video_widget.dart';
-import 'package:visibility_detector/visibility_detector.dart';
+import 'package:talawa/widgets/post_modal.dart';
 
+/// Stateless class to show the fetched post.
+///
+/// entirely ui based widget
 class NewsPost extends StatelessWidget {
   const NewsPost({
-    Key? key,
+    super.key,
     required this.post,
     this.function,
-  }) : super(key: key);
+    this.deletePost,
+  });
 
+  /// Post object containing all the data related to the post.
+  ///
+  /// see the post model to get more information regarding this
   final Post post;
+
+  /// This function is passed for the handling the action to be performed when the comment button is clicked.
+  ///
+  /// to see the function check the place where the widget is called.
   final Function(Post)? function;
 
+  /// To delete the post if user can.
+  ///
+  /// only work if the post is made by the user
+  final Function(Post)? deletePost;
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // const PinnedPostCarousel(),
-        ListTile(
-          leading: CustomAvatar(
-            isImageNull: post.creator!.image == null,
-            firstAlphabet:
-                post.creator!.firstName!.substring(0, 1).toUpperCase(),
-            imageUrl: post.creator!.image,
-            fontSize: 24,
-          ),
-          title: Text(
-            "${post.creator!.firstName} ${post.creator!.lastName}",
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
-          ),
-          subtitle: Text(post.getPostCreatedDuration()),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(16)),
         ),
-        DescriptionTextWidget(text: post.description!),
-        Container(
-          height: 400,
-          color:
-              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
-          child: PostContainer(id: post.sId),
-        ),
-        BaseView<LikeButtonViewModel>(
-          onModelReady: (model) {
-            model.initialize(post.likedBy ?? [], post.sId);
-          },
-          builder: (context, model, child) => Column(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: () => function != null ? function!(post) : {},
-                      child: Text(
-                        "${model.likedBy.length} ${AppLocalizations.of(context)!.strictTranslate("Likes")}",
-                        style: const TextStyle(
-                          fontFamily: 'open-sans',
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => function != null ? function!(post) : {},
-                      child: Text(
-                        "${post.comments!.length} ${AppLocalizations.of(context)!.strictTranslate("comments")}",
-                      ),
-                    )
-                  ],
-                ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListTile(
+              leading: CustomAvatar(
+                isImageNull: post.creator!.image == null,
+                firstAlphabet:
+                    post.creator!.firstName!.substring(0, 1).toUpperCase(),
+                imageUrl:
+                    "${'${GraphqlConfig.orgURI}'.replaceFirst('/graphql', '')}/${post.creator!.image}",
+                fontSize: 20,
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Divider(),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        model.toggleIsLiked();
-                      },
-                      child: Icon(
-                        Icons.thumb_up,
-                        color: model.isLiked
-                            ? Theme.of(context).colorScheme.secondary
-                            : const Color(0xff737373),
-                      ),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "${post.creator!.firstName} ${post.creator!.lastName}",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black38,
                     ),
-                    GestureDetector(
-                      onTap: () => function != null ? function!(post) : {},
-                      child: const Padding(
-                        padding: EdgeInsets.only(left: 18.0),
-                        child: Icon(
-                          Icons.comment,
-                          color: Color(0xff737373),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class PostContainer extends StatefulWidget {
-  const PostContainer({
-    required this.id,
-    Key? key,
-  }) : super(key: key);
-  final String id;
-
-  @override
-  PostContainerState createState() => PostContainerState();
-}
-
-class PostContainerState extends State<PostContainer> {
-  bool startedPlaying = false;
-  bool inView = true;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  final PageController controller = PageController(initialPage: 0);
-  int pindex = 0;
-  @override
-  Widget build(BuildContext context) {
-    return VisibilityDetector(
-      key: Key(widget.id),
-      onVisibilityChanged: (info) {
-        info.visibleFraction > 0.5 ? inView = true : inView = false;
-        if (mounted) setState(() {});
-      },
-      child: Stack(
-        children: [
-          PageView(
-            scrollDirection: Axis.horizontal,
-            controller: controller,
-            onPageChanged: (index) {
-              setState(() {
-                pindex = index;
-                inView = pindex == 0;
-              });
-            },
-            children: List.generate(
-              4,
-              (index) => index == 0
-                  ? Center(
-                      child: VideoWidget(
-                        url:
-                            'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
-                        play: inView,
-                      ),
-                    )
-                  : const Image(
-                      image: NetworkImage(
-                        'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-                      ),
-                    ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 100.0,
-                    vertical: 10.0,
                   ),
-                  child: Row(
-                    children: [
-                      for (int i = 0; i < 4; i++)
-                        Expanded(
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 5.0),
-                            child: Divider(
-                              thickness: 3.0,
-                              color: pindex == i
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Colors.grey,
+                  IconButton(
+                    onPressed: () {
+                      showModalBottomSheet<void>(
+                        context: context,
+                        builder: (BuildContext context1) {
+                          return Container(
+                            height: 120,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(16),
+                                topLeft: Radius.circular(16),
+                              ),
+                            ),
+                            child: PostBottomModal(
+                              post: post,
+                              deletePost: deletePost,
+                              function: function,
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    icon: const Icon(
+                      Icons.report_gmailerrorred_outlined,
+                      color: Colors.black38,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            post.imageUrl == null
+                ? DescriptionTextWidget(text: post.description!)
+                : Container(),
+            post.imageUrl != null
+                ? Container(
+                    height: 380,
+                    color: Colors.white,
+                    child: PostContainer(photoUrl: post.imageUrl),
+                  )
+                : Container(),
+            BaseView<LikeButtonViewModel>(
+              onModelReady: (model) {
+                model.initialize(post.likedBy ?? [], post.sId);
+              },
+              builder: (context, model, child) => Column(
+                children: [
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          child: Column(
+                            children: [
+                              MultiReactButton(
+                                toggle: () {
+                                  model.toggleIsLiked();
+                                },
+                              ),
+                              Text(
+                                "${model.likedBy.length}",
+                                style: const TextStyle(
+                                  fontFamily: 'open-sans',
+                                  color: Colors.black38,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 20,
+                        ),
+                        Container(
+                          child: Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () =>
+                                    function != null ? function!(post) : {},
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: SizedBox(
+                                    height: (MediaQuery.sizeOf(context).width /
+                                            392) *
+                                        35,
+                                    width: (MediaQuery.sizeOf(context).width /
+                                            392) *
+                                        35,
+                                    child: SvgPicture.asset(
+                                      'assets/images/comment.svg',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                "${post.comments!.length}",
+                                style: const TextStyle(
+                                  color: Colors.black38,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(120, 0, 0, 0),
+                          child: Text(
+                            '    ${post.getPostCreatedDuration()}',
+                            style: const TextStyle(
+                              color: Colors.black38,
+                              fontSize: 12,
                             ),
                           ),
-                        )
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
-                )
-              ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () => function != null ? function!(post) : {},
+                          child: Text(
+                            //TODO: Currently the Liked Model contain on SID of USER who liked the post, thus my name here
+                            "${AppLocalizations.of(context)!.strictTranslate("Liked")} by ...",
+                            style: const TextStyle(
+                              fontFamily: 'open-sans',
+                              color: Colors.black38,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 5,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        post.imageUrl != null
+                            ? DescriptionTextWidget(text: post.description!)
+                            : Container(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

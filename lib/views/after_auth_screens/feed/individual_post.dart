@@ -1,30 +1,31 @@
-// ignore_for_file: talawa_api_doc
-// ignore_for_file: talawa_good_doc_comments
-
 import 'package:flutter/material.dart';
 import 'package:talawa/models/comment/comment_model.dart';
 import 'package:talawa/models/post/post_model.dart';
+import 'package:talawa/services/size_config.dart';
 import 'package:talawa/utils/app_localization.dart';
 import 'package:talawa/view_model/widgets_view_models/comments_view_model.dart';
 import 'package:talawa/views/base_view.dart';
 import 'package:talawa/widgets/post_widget.dart';
 
 // Global State, should be removed in next few iterations
+
+/// Comment view model.
 late CommentsViewModel _commentViewModel;
 
 /// IndividualPostView returns a widget that has mutable state _IndividualPostViewState.
 class IndividualPostView extends StatefulWidget {
-  const IndividualPostView({Key? key, required this.post}) : super(key: key);
+  const IndividualPostView({super.key, required this.post});
+
+  /// Individual Post.
   final Post post;
 
   @override
   _IndividualPostViewState createState() => _IndividualPostViewState();
 }
 
-/// _IndividualPostViewState returns a widget to show Individual Post View state. This widget
-/// includes to send the  comment on the post, shows list of all users liked and commented on the post.
 class _IndividualPostViewState extends State<IndividualPostView> {
   final TextEditingController _controller = TextEditingController();
+  bool _isCommentValid = false;
 
   @override
   Widget build(BuildContext context) {
@@ -43,14 +44,24 @@ class _IndividualPostViewState extends State<IndividualPostView> {
                 key: const Key('indi_post_tf_key'),
                 controller: _controller,
                 textInputAction: TextInputAction.send,
-                onSubmitted: (msg) {
-                  _commentViewModel.createComment(msg);
-                  _controller.text = "";
+                onChanged: (msg) {
+                  if (msg.isEmpty && _isCommentValid == true) {
+                    setState(() {
+                      _isCommentValid = false;
+                    });
+                  }
+                  if (msg.isEmpty == false && _isCommentValid == false) {
+                    setState(() {
+                      _isCommentValid = true;
+                    });
+                  }
                 },
                 textAlign: TextAlign.start,
-                decoration: const InputDecoration(
-                  hintText: "Write your comment here..",
-                  contentPadding: EdgeInsets.all(8.0),
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.strictTranslate(
+                    "Write your comment here..",
+                  ),
+                  contentPadding: const EdgeInsets.all(8.0),
                   focusColor: Colors.black,
                   border: InputBorder.none,
                 ),
@@ -59,12 +70,33 @@ class _IndividualPostViewState extends State<IndividualPostView> {
             ),
             // Button to send the comment.
             TextButton(
-              onPressed: () {
-                _commentViewModel.createComment(_controller.text);
-                _controller.text = "";
-              },
-              child: const Text("Send"),
-            )
+              key: const Key('sendButton'),
+              style: _isCommentValid == false
+                  ? ButtonStyle(
+                      overlayColor:
+                          MaterialStateProperty.all(Colors.transparent),
+                    )
+                  : null,
+              //check if button is enabled when comment is valid
+              onPressed: _isCommentValid
+                  ? () {
+                      _commentViewModel.createComment(_controller.text);
+                      _controller.text = "";
+
+                      setState(() {
+                        _isCommentValid = false;
+                      });
+                    }
+                  : null,
+              child: Text(
+                AppLocalizations.of(context)!.strictTranslate(
+                  "Send",
+                ),
+                style: !_isCommentValid
+                    ? const TextStyle(color: Colors.grey)
+                    : null,
+              ),
+            ),
           ],
         ),
       ),
@@ -75,7 +107,9 @@ class _IndividualPostViewState extends State<IndividualPostView> {
             post: widget.post,
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: EdgeInsets.symmetric(
+              horizontal: SizeConfig.screenHeight! * 0.010,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -90,19 +124,27 @@ class _IndividualPostViewState extends State<IndividualPostView> {
                 ),
                 const SizedBox(
                   height: 200,
-                )
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
   }
 }
 
+/// Generates a `Padding` widget with customizable vertical padding around a text element.
+///
+/// **params**:
+/// * `context`: The build context in which the padding method is called.
+/// * `text`: The text on which padding should be applied.
+///
+/// **returns**:
+/// * `Padding`: Padding widget with vertical padding applied to the provided text.
 Padding buildPadding(BuildContext context, String text) {
   return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8.0),
+    padding: EdgeInsets.symmetric(vertical: SizeConfig.screenHeight! * 0.006),
     child: Text(
       AppLocalizations.of(context)!.strictTranslate(text),
       style: Theme.of(context).textTheme.titleLarge,
@@ -113,10 +155,11 @@ Padding buildPadding(BuildContext context, String text) {
 /// IndividualPageLikeSection returns a widget that show the list of all the users liked the post.
 class IndividualPageLikeSection extends StatelessWidget {
   const IndividualPageLikeSection({
-    Key? key,
+    super.key,
     required this.usersLiked,
-  }) : super(key: key);
+  });
 
+  /// Represents a list of users who have liked a post.
   final List<LikedBy> usersLiked;
 
   @override
@@ -124,13 +167,18 @@ class IndividualPageLikeSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        buildPadding(context, "Liked by"),
+        buildPadding(
+          context,
+          AppLocalizations.of(context)!.strictTranslate(
+            "Liked by",
+          ),
+        ),
         Row(
           children: [
             // Looping through the usersLiked list,
             for (int i = 0; i < usersLiked.length; i++)
               // renders the custom widget for invidual user.
-              likedUserCircleAvatar(usersLiked[i])
+              likedUserCircleAvatar(usersLiked[i]),
           ],
         ),
       ],
@@ -138,14 +186,20 @@ class IndividualPageLikeSection extends StatelessWidget {
   }
 }
 
-/// IndividualPostCommentSection returns a widget that show the list of all the users commented on the post.
+/// Widget representing the comment section of an individual post.
+///
+/// The `IndividualPostCommentSection` widget displays a list of comments on a post.
 class IndividualPostCommentSection extends StatelessWidget {
   const IndividualPostCommentSection({
-    Key? key,
+    super.key,
     required this.comments,
     required this.postID,
-  }) : super(key: key);
+  });
+
+  /// List of comments on a post.
   final List<Comments> comments;
+
+  /// ID of a post with associated comments.
   final String postID;
 
   @override
@@ -163,7 +217,7 @@ class IndividualPostCommentSection extends StatelessWidget {
           // Looping through the commentList list,
           for (int i = 0; i < model.commentList.length; i++)
             // renders the custom widget for invidual user.
-            CommentTemplate(comment: model.commentList[i])
+            CommentTemplate(comment: model.commentList[i]),
         ],
       ),
     );
@@ -173,10 +227,11 @@ class IndividualPostCommentSection extends StatelessWidget {
 /// CommentTemplate returns a widget of the individual user commented on the post.
 class CommentTemplate extends StatelessWidget {
   const CommentTemplate({
-    Key? key,
+    super.key,
     required this.comment,
-  }) : super(key: key);
+  });
 
+  /// Instance of comment.
   final Comment comment;
 
   @override
@@ -213,25 +268,31 @@ class CommentTemplate extends StatelessWidget {
               ],
             ),
           ),
-        )
+        ),
       ],
     );
   }
 }
 
-/// likedUserCircleAvatar returns a widget of the individual user liked the post.
+/// Generates a Circle Avatar representing a user who liked the post.
+///
+/// **params**:
+/// * `user`: The user who liked the post, represented by the `LikedBy` class.
+///
+/// **returns**:
+/// * `Widget`: Circle Avatar of the user who liked the post.
 Widget likedUserCircleAvatar(LikedBy user) {
-  return Padding(
-    padding: const EdgeInsets.only(right: 10.0, bottom: 16.0),
+  return const Padding(
+    padding: EdgeInsets.only(right: 10.0, bottom: 16.0),
     child: Stack(
       clipBehavior: Clip.none,
       alignment: Alignment.center,
       children: [
-        const CircleAvatar(
+        CircleAvatar(
           backgroundColor: Color(0xfff2f2f2),
           radius: 20,
         ),
-        const Positioned(
+        Positioned(
           top: 30,
           right: 0,
           bottom: 20,

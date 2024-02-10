@@ -40,6 +40,52 @@ class PostQueries {
 """;
   }
 
+  /// Getting Post by Post Id.
+  ///
+  /// **params**:
+  /// * `postId`: The post id
+  ///
+  /// **returns**:
+  /// * `String`: The query related to gettingPostsbyId
+  String getPostById(String postId) {
+    return """
+      query {
+        post(id: "$postId")
+        { 
+          _id
+          text
+          createdAt
+          imageUrl
+          videoUrl
+          title
+          commentCount
+          likeCount
+          creator{
+            _id
+            firstName
+            lastName
+            image
+          }
+          organization{
+            _id
+          }
+          likedBy{
+            _id
+          }
+          comments{
+           _id,
+            text,
+             createdAt
+        creator{
+          firstName
+          lastName
+        }
+          }
+        }
+      }
+""";
+  }
+
   /// Add Like to a post.
   ///
   /// **params**:
@@ -94,6 +140,7 @@ class PostQueries {
     \$imageUrl: URL
     \$videoUrl: URL
     \$organizationId: ID!
+    \$file: String
   ) {
     createPost(
       data: {
@@ -103,10 +150,51 @@ class PostQueries {
         videoUrl: \$videoUrl
         organizationId: \$organizationId
       }
+      file: \$file
     ) {
       _id
+      text
+      createdAt
+      imageUrl
+      videoUrl
+      title
+      commentCount
+      likeCount
+      creator{
+        _id
+        firstName
+        lastName
+        image
+      }
+      organization{
+        _id
+      }
+      likedBy{
+        _id
+      }
+      comments{
+        _id
+          }
     }
   }
+    ''';
+  }
+
+  /// Mutation to remove the post.
+  ///
+  ///
+  /// **params**:
+  ///   None
+  ///
+  /// **returns**:
+  /// * `String`: query is returned
+  String removePost() {
+    return '''   
+    mutation RemovePost(\$id: ID!) {
+      removePost(id: \$id) {
+        _id
+      }
+    }
     ''';
   }
 }

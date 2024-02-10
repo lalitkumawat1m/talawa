@@ -9,7 +9,7 @@ import 'package:talawa/models/post/post_model.dart';
 import 'package:talawa/models/task/task_model.dart';
 import 'package:talawa/splash_screen.dart';
 import 'package:talawa/view_model/after_auth_view_models/chat_view_models/direct_chat_view_model.dart';
-import 'package:talawa/view_model/after_auth_view_models/event_view_models/create_event_view_model.dart';
+import 'package:talawa/views/after_auth_screens/add_post_page.dart';
 import 'package:talawa/views/after_auth_screens/app_settings/app_settings_page.dart';
 import 'package:talawa/views/after_auth_screens/chat/chat_message_screen.dart';
 import 'package:talawa/views/after_auth_screens/chat/select_contact.dart';
@@ -21,6 +21,7 @@ import 'package:talawa/views/after_auth_screens/events/explore_events.dart';
 import 'package:talawa/views/after_auth_screens/feed/individual_post.dart';
 import 'package:talawa/views/after_auth_screens/feed/organization_feed.dart';
 import 'package:talawa/views/after_auth_screens/feed/pinned_post_page.dart';
+import 'package:talawa/views/after_auth_screens/feed/pinned_post_screen.dart';
 import 'package:talawa/views/after_auth_screens/join_org_after_auth/access_request_screen.dart';
 import 'package:talawa/views/after_auth_screens/join_org_after_auth/join_organisation_after_auth.dart';
 import 'package:talawa/views/after_auth_screens/profile/edit_profile_page.dart';
@@ -29,7 +30,9 @@ import 'package:talawa/views/after_auth_screens/tasks/create_task_page.dart';
 import 'package:talawa/views/after_auth_screens/tasks/edit_task_page.dart';
 import 'package:talawa/views/after_auth_screens/tasks/event_tasks_page.dart';
 import 'package:talawa/views/after_auth_screens/tasks/user_tasks_page.dart';
-import 'package:talawa/views/after_auth_screens/venue/map_screen.dart';
+import 'package:talawa/views/demo_screens/explore_events_demo.dart';
+import 'package:talawa/views/demo_screens/organization_feed_demo.dart';
+import 'package:talawa/views/demo_screens/profile_page_demo.dart';
 import 'package:talawa/views/main_screen.dart';
 import 'package:talawa/views/pre_auth_screens/change_password.dart';
 import 'package:talawa/views/pre_auth_screens/login.dart';
@@ -38,12 +41,19 @@ import 'package:talawa/views/pre_auth_screens/select_language.dart';
 import 'package:talawa/views/pre_auth_screens/select_organization.dart';
 import 'package:talawa/views/pre_auth_screens/set_url.dart';
 import 'package:talawa/views/pre_auth_screens/signup_details.dart';
-import 'package:talawa/views/pre_auth_screens/waiting_to_join_private_org.dart';
+import 'package:talawa/views/pre_auth_screens/waiting_screen.dart';
 
-/// The MaterialApp provides us with a property called generateRoute where
-/// we can pass in a Function that returns a Route<dynamic> and takes in RouteSettings
+/// The MaterialApp provides us with a property called generateRoute where.
 ///
+///
+/// we can pass in a Function that returns a Route<dynamic> and takes in RouteSettings
 /// Thus for this purpose, we create a function named generateRoute
+///
+/// **params**:
+/// * `settings`: RouteSetting have been passed
+///
+/// **returns**:
+/// * `Route<dynamic>`: Return a Route
 Route<dynamic> generateRoute(RouteSettings settings) {
   // The settings contains the route information of the requested route.
   // It provides two key things to us: the name, and the arguments.
@@ -125,6 +135,13 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         builder: (context) => const OrganizationFeed(key: Key('HomeScreen')),
       );
 
+    // Returns the DemoOrganizationFeed Widget
+    case Routes.demoHomeScreen:
+      return MaterialPageRoute(
+        builder: (context) =>
+            const DemoOrganizationFeed(key: Key('DemoHomeScreen')),
+      );
+
     // Returns the MainScreen Widget
     case Routes.mainScreen:
       final MainScreenArgs mainScreenArgs =
@@ -160,6 +177,13 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         builder: (context) => const ExploreEvents(key: Key('ExploreEvents')),
       );
 
+    // Returns the DemoExploreEvents Widget
+    case Routes.demoExploreEventsScreen:
+      return MaterialPageRoute(
+        builder: (context) =>
+            const DemoExploreEvents(key: Key('DemoExploreEvents')),
+      );
+
     // Returns the EventInfoPage Widget
     case Routes.eventInfoPage:
       final Map<String, dynamic> args =
@@ -181,6 +205,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case Routes.profilePage:
       return MaterialPageRoute(
         builder: (context) => const ProfilePage(key: Key('Profile')),
+      );
+
+    // Return the DemoProfilePage Widget
+    case Routes.demoProfilePage:
+      return MaterialPageRoute(
+        builder: (context) => const DemoProfilePage(key: Key('DemoProfile')),
       );
 
     // Returns the EditProfilePage Widget
@@ -216,7 +246,14 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           event: event,
         ),
       );
+    case Routes.pinnedPostScreen:
+      // final Map<String, dynamic> post = settings.arguments! as Map<String, dynamic> ;
+      final Map<String, String> post =
+          settings.arguments! as Map<String, String>;
 
+      return MaterialPageRoute(
+        builder: (context) => PinnedPostScreen(post: post),
+      );
     // Returns the AppSettingsPage Widget
     case Routes.appSettings:
       return MaterialPageRoute(
@@ -236,20 +273,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         ),
       );
 
-    // Returns the MapScreen Widget
-    case Routes.mapScreen:
-      final arguments = settings.arguments! as Map<String, dynamic>;
-      final model = arguments['model'] as CreateEventViewModel?;
-      final latitude = arguments['latitude'] as double;
-      final longitude = arguments['longitude'] as double;
-      return MaterialPageRoute(
-        builder: (context) => MapScreen(
-          model,
-          latitude,
-          longitude,
-          key: const Key('MapScreen'),
-        ),
-      );
     case Routes.calendar:
       return MaterialPageRoute(
         builder: (context) => EventCalendar(
@@ -287,11 +310,18 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           task: task,
         ),
       );
-    // Returns the DemoPageView Widget by default
     case Routes.selectContact:
       return MaterialPageRoute(
         builder: (context) => const SelectContact(key: Key('selectContact')),
       );
+
+    case Routes.addPostScreen:
+      return MaterialPageRoute(
+        builder: (context) => const AddPost(
+          key: Key('AddPostPage'),
+        ),
+      );
+
     default:
       return MaterialPageRoute(
         builder: (context) => const DemoPageView(

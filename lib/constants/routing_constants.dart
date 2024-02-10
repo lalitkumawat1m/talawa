@@ -35,6 +35,9 @@ class Routes {
   static const String homeScreen = "/homeScreen";
 
   /// static variables.
+  static const String demoHomeScreen = "/demoHomeScreen";
+
+  /// static variables.
   static const String mainScreen = "/mainScreen";
 
   /// static variables.
@@ -50,6 +53,9 @@ class Routes {
   static const String exploreEventsScreen = "/exploreEvents";
 
   /// static variables.
+  static const String demoExploreEventsScreen = "/demoExploreEvents";
+
+  /// static variables.
   static const String eventInfoPage = "/eventInfo";
 
   /// static variables.
@@ -57,6 +63,9 @@ class Routes {
 
   /// static variables.
   static const String profilePage = "/profilePage";
+
+  /// static variables.
+  static const String demoProfilePage = "/demoProfilePage";
 
   /// static variables.
   static const String editProfilePage = "/editProfilePage";
@@ -77,9 +86,6 @@ class Routes {
   static const String chatMessageScreen = '/chatMessageScreen';
 
   /// static variables.
-  static const String mapScreen = '/mapScreen';
-
-  /// static variables.
   static const String calendar = '/calendar';
 
   /// static variables.
@@ -96,4 +102,10 @@ class Routes {
 
   /// static variables.
   static const String selectContact = '/selectContact';
+
+  /// static variable to access pinnedpostscreen.
+  static const String pinnedPostScreen = '/pinnedpostscreen';
+
+  /// static variable to access addPostScreen.
+  static const String addPostScreen = '/addpostscreen';
 }
